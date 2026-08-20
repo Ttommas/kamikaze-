@@ -1,18 +1,1788 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>KAMIKAZE — Hacer Juntos | Talleres & Colectivo</title>
-    <meta name="description" content="Colectivo artístico — proceso & materia. Talleres abiertos, bitácora e inscripciones 2026." />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:ital,wght@0,300;0,400;0,600;0,800;0,900;1,400&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@700;800;900&family=VT323&display=swap" rel="stylesheet">
-  </head>
-  <body class="bg-[#FFD41D] text-[#E52E33] selection:bg-[#E52E33] selection:text-[#FFD41D]">
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KAMIKAZE — Hacer Juntos | Colectivo Artístico & Talleres 2026</title>
+  <meta name="description" content="Espacio autogestivo de talleres, investigación en cerámica, dibujo, sonido y gráfica editorial. Inscripciones abiertas y bitácora de procesos." />
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:ital,wght@0,300;0,400;0,600;0,800;0,900;1,400&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@700;800;900&family=VT323&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- React 18, ReactDOM & Babel for in-browser standalone execution -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    :root {
+      --brand-yellow: #FFD41D;
+      --brand-red: #E52E33;
+      --brand-yellow-dark: #f0c510;
+      --brand-yellow-hatch: #e3b80e;
+    }
+
+    body {
+      background-color: #FFD41D;
+      color: #E52E33;
+      font-family: "Arial Narrow", "Helvetica Neue Condensed", "Roboto Condensed", -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+      letter-spacing: -0.01em;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, h4, .brand-title {
+      font-family: 'Space Mono', 'Chivo Mono', 'VT323', monospace, sans-serif !important;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+    }
+
+    /* Texture hatching based on brand manual */
+    .ph {
+      position: relative;
+      background: #f0c510;
+      overflow: hidden;
+    }
+
+    .ph::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(135deg, transparent, transparent 11px, #e3b80e 11px, #e3b80e 12px);
+      pointer-events: none;
+    }
+
+    .ph.lbl::after {
+      content: attr(data-l);
+      position: absolute;
+      left: 24px;
+      bottom: 20px;
+      font-family: "Arial Narrow", Arial, sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #E52E33;
+      opacity: 0.8;
+      z-index: 2;
+    }
+
+    .ph-red {
+      position: relative;
+      background: #d82025;
+      overflow: hidden;
+    }
+
+    .ph-red::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(135deg, transparent, transparent 11px, #b91519 11px, #b91519 12px);
+      pointer-events: none;
+    }
+
+    /* Interactive brand buttons and rows */
+    .btn-brand {
+      transition: all .2s cubic-bezier(0.16, 1, 0.3, 1);
+      background: #FFD41D;
+      color: #E52E33;
+      border: 1px solid #E52E33;
+    }
+
+    .btn-brand:hover {
+      background: #E52E33;
+      color: #FFD41D;
+    }
+
+    .btn-brand-inverse {
+      transition: all .2s cubic-bezier(0.16, 1, 0.3, 1);
+      background: #E52E33;
+      color: #FFD41D;
+      border: 1px solid #E52E33;
+    }
+
+    .btn-brand-inverse:hover {
+      background: #FFD41D;
+      color: #E52E33;
+    }
+
+    .brand-row {
+      transition: padding-left .28s cubic-bezier(0.16, 1, 0.3, 1), background .25s ease;
+    }
+
+    .brand-row:hover {
+      padding-left: 48px;
+      background: rgba(229, 46, 51, 0.05);
+    }
+
+    .lk-brand {
+      transition: opacity .2s ease;
+    }
+
+    .lk-brand:hover {
+      opacity: .5;
+    }
+
+    .brand-image-duotone {
+      filter: grayscale(100%) contrast(140%);
+      mix-blend-mode: multiply;
+      opacity: 0.92;
+    }
+
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .hide-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-[#FFD41D] text-[#E52E33] selection:bg-[#E52E33] selection:text-[#FFD41D]">
+  <div id="root"></div>
+
+  <!-- Main React App bundle in single script tag -->
+  <script type="text/babel">
+    const { useState, useEffect, useMemo, useRef } = React;
+
+    // --- SVG ICONS HELPER ---
+    const Icon = ({ name, className = "w-4 h-4", ...props }) => {
+      const icons = {
+        user: <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>,
+        lock: <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>,
+        check: <polyline points="20 6 9 17 4 12"/>,
+        checkCircle: <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>,
+        close: <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>,
+        copy: <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>,
+        download: <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>,
+        calendar: <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>,
+        clock: <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>,
+        mapPin: <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>,
+        mail: <rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>,
+        phone: <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>,
+        youtube: <path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"/><polygon points="10 15 15 12 10 9 10 15"/>,
+        arrowDown: <line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/>,
+        externalLink: <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>,
+        trash: <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>,
+        plus: <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>,
+        search: <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>,
+        qr: <rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/>,
+        sparkles: <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>,
+        creditCard: <rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>,
+        wallet: <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>,
+        shield: <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/>
+      };
+
+      return (
+        <svg 
+          xmlns="http://www.w3.org/2000/svg" 
+          viewBox="0 0 24 24" 
+          fill="none" 
+          stroke="currentColor" 
+          strokeWidth="2" 
+          strokeLinecap="round" 
+          strokeLinejoin="round" 
+          className={className} 
+          {...props}
+        >
+          {icons[name] || icons.sparkles}
+        </svg>
+      );
+    };
+
+    // --- LOGO COMPONENT ---
+    const KamikazeLogo = ({ size = "md" }) => {
+      const sizeClasses = {
+        sm: "h-8",
+        md: "h-12 sm:h-14",
+        lg: "h-16 sm:h-20"
+      };
+
+      return (
+        <div className={`flex items-center gap-2 ${sizeClasses[size]}`}>
+          <div className="flex flex-col font-mono font-black leading-none tracking-tighter select-none">
+            <span className="text-xl sm:text-2xl font-bold bg-[#E52E33] text-[#FFD41D] px-1.5 py-0.5 tracking-[-0.05em]">
+              KAMIKAZE
+            </span>
+            <span className="text-[9px] sm:text-[10px] tracking-[0.25em] font-mono text-[#E52E33] mt-0.5 uppercase">
+              Hacer Juntos · 2026
+            </span>
+          </div>
+        </div>
+      );
+    };
+
+    // --- INITIAL DATA ---
+    const INITIAL_WORKSHOPS = [
+      {
+        id: 'ws-cer-01',
+        title: 'Cerámica Salvaje: Hornos de Leña & Arcillas Locales',
+        category: 'ceramica',
+        format: 'intensivo',
+        instructor: 'Lucía Soria & Colectivo Barro Crudo',
+        instructorBio: 'Ceramistas investigadores de canteras y quemas alternativas en el litoral bonaerense.',
+        dateRange: '14, 15 y 16 de Marzo 2026',
+        schedule: 'Viernes 18 a 21hs | Sáb y Dom 10 a 18hs',
+        location: 'Sede Taller Kamikaze — Galpón de Quemas',
+        price: 45000,
+        memberPrice: 36000,
+        totalSpots: 12,
+        availableSpots: 4,
+        description: 'Taller intensivo de formulación de pastas cerámicas con sedimentos de río, construcción de piezas escultóricas a mano y cocción en horno de tiro directo a leña.',
+        syllabus: [
+          'Jornada 1: Recolección, decantación y amasado de barros crudos.',
+          'Jornada 2: Modelado por pellizco, colombines y bruñido con cuarzos.',
+          'Jornada 3: Carga de horno, curvas de temperatura, reducción y deshorne colectivo.'
+        ],
+        requirements: 'Ropa de trabajo, delantal grueso y barbijo para molienda.',
+        materialsIncluded: 'Todas las arcillas, maderas para la quema y quemada final de 2 piezas por participante.',
+        image: 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?auto=format&fit=crop&q=80&w=1200',
+        featured: true,
+        tags: ['Fuego', 'Barro', 'Quema Directa']
+      },
+      {
+        id: 'ws-ris-02',
+        title: 'Publicaciones Subterráneas: Risografía & Fanzines',
+        category: 'grafica',
+        format: 'cuatrimestral',
+        instructor: 'Martín Pescador & Editorial Parásita',
+        instructorBio: 'Impresores y editores gráficos con más de 10 años publicando gráfica urgente.',
+        dateRange: 'Abril a Julio 2026 (16 encuentros)',
+        schedule: 'Martes 18:30 a 21:00 hs',
+        location: 'Laboratorio Gráfico Kamikaze',
+        price: 32000,
+        memberPrice: 25600,
+        totalSpots: 10,
+        availableSpots: 2,
+        description: 'Laboratorio de autoedición, separación de tintas por canales CMYK analógicos, maquetación tipográfica manual e impresión en duplicadora Risograph.',
+        syllabus: [
+          'Módulo 1: Anatomía del fanzine, pliegues experimentales y narrativa visual.',
+          'Módulo 2: Técnicas de fotomecánica, tramas estocásticas y matrices.',
+          'Módulo 3: Impresión a dos y tres tintas flúor en Riso MZ770.',
+          'Módulo 4: Encuadernación rústica, guillotinado y feria colectiva.'
+        ],
+        requirements: 'Ganas de cortar papel y traer material visual propio.',
+        materialsIncluded: 'Papeles Munken y Chambril, tintas flúor Riso y matrices ilimitadas.',
+        image: 'https://images.unsplash.com/photo-1588854337236-6889d631faa8?auto=format&fit=crop&q=80&w=1200',
+        featured: true,
+        tags: ['Riso', 'Fanzine', 'Tipografía']
+      },
+      {
+        id: 'ws-son-03',
+        title: 'Circuit Bending & Paisajes Sonoros DIY',
+        category: 'sonido',
+        format: 'taller',
+        instructor: 'Franco "Noise" Valenzuela',
+        instructorBio: 'Artista sonoro y luthier de sintes analógicos de código abierto.',
+        dateRange: '4 Sábados de Mayo 2026',
+        schedule: 'Sábados de 15:00 a 19:00 hs',
+        location: 'Sala de Frecuencias & Audio',
+        price: 38000,
+        memberPrice: 30400,
+        totalSpots: 8,
+        availableSpots: 3,
+        description: 'Intervención de juguetes electrónicos obsoletos, soldadura de osciladores CMOS 40106 y armado de un sintetizador dron en gabinete de madera reciclada.',
+        syllabus: [
+          'Encuentro 1: Principios del cortocircuito seguro y lectura de placas.',
+          'Encuentro 2: Soldadura con estaño, potenciómetros y fotoresistencias LDR.',
+          'Encuentro 3: Construcción de filtros pasivos y salidas de jack 1/4.',
+          'Encuentro 4: Jam colectiva y grabación en cinta abierta.'
+        ],
+        requirements: 'Traer un juguete a pilas que emita sonido (no 220V).',
+        materialsIncluded: 'Soldador de estaño, componentes electrónicos, gabinete y plaqueta PCB.',
+        image: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&q=80&w=1200',
+        featured: false,
+        tags: ['Sintetizadores', 'Noise', 'Electrónica']
+      },
+      {
+        id: 'ws-dib-04',
+        title: 'Dibujo Expandido: Gran Formato & Grafito Puro',
+        category: 'dibujo',
+        format: 'clinica',
+        instructor: 'Julieta Mansilla',
+        instructorBio: 'Licenciada en Artes Visuales, exploradora del trazo monumental y la performance.',
+        dateRange: 'Junio 2026 (4 clases)',
+        schedule: 'Jueves 18:00 a 21:30 hs',
+        location: 'Patio Central de Artes',
+        price: 29000,
+        memberPrice: 23200,
+        totalSpots: 14,
+        availableSpots: 6,
+        description: 'El dibujo como acto físico en el espacio. Trabajo sobre papeles continuos de 10 metros, barras de carbón vegetal prensado y herramientas de extensión corporal.',
+        syllabus: [
+          'Sesión 1: El cuerpo como compás y escala arquitectónica.',
+          'Sesión 2: Densidades de negro, frotados y transferencias.',
+          'Sesión 3: Borrado sustractivo con goma y solventes.',
+          'Sesión 4: Montaje efímero y registro de procesos.'
+        ],
+        requirements: 'Ropa cómoda que pueda mancharse de carbón.',
+        materialsIncluded: 'Rollos de papel kraft, carbón vegetal, grafito 9B y fijadores.',
+        image: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&q=80&w=1200',
+        featured: false,
+        tags: ['Gran Formato', 'Grafito', 'Cuerpo']
+      }
+    ];
+
+    const INITIAL_WALLET_CONFIG = {
+      mpAlias: 'kamikaze.colectivo.mp',
+      mpCvu: '0000003100098472910482',
+      cbu: '0140000001000001234567',
+      bankName: 'Banco Provincia / Mercado Pago',
+      accountHolder: 'Colectivo Artístico Kamikaze Asociación',
+      cuit: '30-71829304-9',
+      mpDirectPaymentLink: 'https://mpago.la/2Kmkz26',
+      contactEmail: 'inscripciones@kamikaze.xyz',
+      whatsappNumber: '+54 9 11 5829-1029',
+      atelierAddress: 'Av. Dorrego 1420, Galpón 4, Chacarita, CABA'
+    };
+
+    const INITIAL_BITACORA_VIDEO = {
+      youtubeUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+      title: 'Registro Quema de Leña & Horno Anagama 2026',
+      subtitle: '36 horas continuas de fuego, reducción y cenizas en el Galpón de Quemas Kamikaze.',
+      duration: '14:28 min',
+      publishDate: 'Febrero 2026',
+      author: 'Equipo Audiovisual Kamikaze'
+    };
+
+    const BITACORA_DATA = [
+      {
+        id: 'bit-01',
+        title: 'Formulaciones de Pastas con Sedimentos del Delta',
+        category: 'ceramica',
+        date: '12 FEB 2026',
+        readTime: '4 min',
+        excerpt: 'Ensayos de encogimiento y plasticidad con lodos recolectados en la desembocadura del Río Luján. Pruebas de cono 6 y esmaltes de ceniza.',
+        author: 'Lucía Soria'
+      },
+      {
+        id: 'bit-02',
+        title: 'El Sonido del Error: Fallas en Circuitos CMOS',
+        category: 'sonido',
+        date: '03 FEB 2026',
+        readTime: '6 min',
+        excerpt: 'Cómo transformar caídas de tensión en modulaciones de frecuencia percutivas usando chips lógicos de bajo costo.',
+        author: 'Franco Valenzuela'
+      },
+      {
+        id: 'bit-03',
+        title: 'Manifiesto de la Duplicación Urgente',
+        category: 'editorial',
+        date: '28 ENE 2026',
+        readTime: '3 min',
+        excerpt: 'Notas sobre la economía del papel, el rescate de duplicadoras mimeográficas y la circulación mano a mano en ferias independientes.',
+        author: 'Martín Pescador'
+      }
+    ];
+
+    const EVENTS_DATA = [
+      {
+        id: 'ev-01',
+        title: 'Feria de Publicaciones Raras & Fanzines',
+        date: 'Sábado 22 de Marzo 2026',
+        time: '16:00 a 22:00 hs',
+        location: 'Patio Kamikaze (Entrada Libre)',
+        description: 'Más de 30 editores independientes, feria de gráfica, serigrafía en vivo y barra autogestiva.'
+      },
+      {
+        id: 'ev-02',
+        title: 'Apertura de Horno & Jam de Ruido Analógico',
+        date: 'Domingo 5 de Abril 2026',
+        time: '18:00 hs',
+        location: 'Galpón de Quemas',
+        description: 'Deshorne colectivo de piezas cerámicas al rojo vivo acompañado de performances sonoras en vivo.'
+      }
+    ];
+
+    function getYouTubeId(url) {
+      if (!url) return 'dQw4w9WgXcQ';
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+      const match = url.match(regExp);
+      return match && match[2].length === 11 ? match[2] : 'dQw4w9WgXcQ';
+    }
+
+    function App() {
+      const [workshops, setWorkshops] = useState(() => {
+        try {
+          const s = localStorage.getItem('kmkz_workshops_v1');
+          return s ? JSON.parse(s) : INITIAL_WORKSHOPS;
+        } catch (e) { return INITIAL_WORKSHOPS; }
+      });
+
+      const [enrollments, setEnrollments] = useState(() => {
+        try {
+          const s = localStorage.getItem('kmkz_enrollments_v1');
+          return s ? JSON.parse(s) : [];
+        } catch (e) { return []; }
+      });
+
+      const [walletConfig, setWalletConfig] = useState(() => {
+        try {
+          const s = localStorage.getItem('kmkz_wallet_v1');
+          return s ? JSON.parse(s) : INITIAL_WALLET_CONFIG;
+        } catch (e) { return INITIAL_WALLET_CONFIG; }
+      });
+
+      const [bitacoraVideo, setBitacoraVideo] = useState(() => {
+        try {
+          const s = localStorage.getItem('kmkz_bitacora_video_v1');
+          return s ? JSON.parse(s) : INITIAL_BITACORA_VIDEO;
+        } catch (e) { return INITIAL_BITACORA_VIDEO; }
+      });
+
+      const [currentUser, setCurrentUser] = useState(() => {
+        try {
+          const s = localStorage.getItem('kmkz_student_user_v1');
+          return s ? JSON.parse(s) : null;
+        } catch (e) { return null; }
+      });
+
+      const [selectedWorkshopForDetail, setSelectedWorkshopForDetail] = useState(null);
+      const [selectedWorkshopForEnrollment, setSelectedWorkshopForEnrollment] = useState(null);
+      const [isAdminOpen, setIsAdminOpen] = useState(false);
+      const [isStudentOpen, setIsStudentOpen] = useState(false);
+      const [isProposalOpen, setIsProposalOpen] = useState(false);
+      const [rsvpEvent, setRsvpEvent] = useState(null);
+      const [activeFilter, setActiveFilter] = useState('todos');
+      const [copiedText, setCopiedText] = useState('');
+
+      useEffect(() => {
+        localStorage.setItem('kmkz_workshops_v1', JSON.stringify(workshops));
+      }, [workshops]);
+
+      useEffect(() => {
+        localStorage.setItem('kmkz_enrollments_v1', JSON.stringify(enrollments));
+      }, [enrollments]);
+
+      useEffect(() => {
+        localStorage.setItem('kmkz_wallet_v1', JSON.stringify(walletConfig));
+      }, [walletConfig]);
+
+      useEffect(() => {
+        localStorage.setItem('kmkz_bitacora_video_v1', JSON.stringify(bitacoraVideo));
+      }, [bitacoraVideo]);
+
+      useEffect(() => {
+        if (currentUser) localStorage.setItem('kmkz_student_user_v1', JSON.stringify(currentUser));
+        else localStorage.removeItem('kmkz_student_user_v1');
+      }, [currentUser]);
+
+      const copyToClipboard = (text, label) => {
+        navigator.clipboard.writeText(text);
+        setCopiedText(label);
+        setTimeout(() => setCopiedText(''), 2500);
+      };
+
+      const handleEnrollmentSuccess = (newEnr) => {
+        setEnrollments([newEnr, ...enrollments]);
+        if (!currentUser) {
+          setCurrentUser({
+            name: newEnr.studentName,
+            email: newEnr.studentEmail,
+            phone: newEnr.studentPhone,
+            doc: newEnr.studentDoc,
+            isMember: newEnr.isMember
+          });
+        }
+        setWorkshops(workshops.map(w => w.id === newEnr.workshopId ? { ...w, availableSpots: Math.max(0, w.availableSpots - 1) } : w));
+      };
+
+      const filteredWorkshops = useMemo(() => {
+        if (activeFilter === 'todos') return workshops;
+        return workshops.filter(w => w.format === activeFilter || w.category === activeFilter);
+      }, [workshops, activeFilter]);
+
+      const myEnrollments = currentUser
+        ? enrollments.filter(e => e.studentEmail?.toLowerCase() === currentUser.email?.toLowerCase())
+        : [];
+
+      return (
+        <div className="min-h-screen bg-[#FFD41D] text-[#E52E33] font-sans selection:bg-[#E52E33] selection:text-[#FFD41D]">
+          <div className="w-full max-w-[1440px] mx-auto border-x border-[#E52E33]/40 min-h-screen flex flex-col justify-between">
+            
+            {/* HEADER */}
+            <header className="sticky top-0 z-40 bg-[#FFD41D]/95 backdrop-blur-xs border-b border-[#E52E33] flex justify-between items-center px-4 sm:px-12 py-3 sm:py-4">
+              <KamikazeLogo size="sm" />
+
+              <nav className="hidden xl:flex items-center gap-7 text-[11px] tracking-[0.18em] uppercase font-mono font-medium">
+                <a href="#manifiesto" className="lk-brand">Manifiesto</a>
+                <a href="#ejes" className="lk-brand">Ejes</a>
+                <a href="#bitacora" className="lk-brand">Bitácora</a>
+                <a href="#talleres" className="lk-brand text-[#E52E33] font-bold border-b border-[#E52E33] pb-0.5">Talleres</a>
+                <a href="#artistas" className="lk-brand">Artistas</a>
+                <a href="#eventos" className="lk-brand">Eventos</a>
+                <a href="#sumate" className="lk-brand">Sumate</a>
+              </nav>
+
+              <div className="flex items-center gap-2 sm:gap-3">
+                <button
+                  onClick={() => setIsStudentOpen(true)}
+                  className="btn-brand px-3 py-1.5 text-[11px] font-mono uppercase tracking-wider flex items-center gap-2 font-bold cursor-pointer"
+                >
+                  <Icon name="user" className="w-3.5 h-3.5" />
+                  <span>{currentUser ? currentUser.name.split(' ')[0] : 'Portal Alumnxs'}</span>
+                  {myEnrollments.length > 0 && (
+                    <span className="bg-[#E52E33] text-[#FFD41D] px-1 text-[9px]">{myEnrollments.length}</span>
+                  )}
+                </button>
+
+                <button
+                  onClick={() => setIsAdminOpen(true)}
+                  className="btn-brand-inverse px-3 py-1.5 text-[11px] font-mono uppercase tracking-wider flex items-center gap-1.5 font-bold cursor-pointer"
+                  title="Acceso Administrador (colectivokamizaze / kamikaze2026)"
+                >
+                  <Icon name="lock" className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Admin</span>
+                </button>
+              </div>
+            </header>
+
+            {/* HERO */}
+            <section 
+              className="ph lbl min-h-[75vh] border-b border-[#E52E33] flex flex-col justify-between p-6 sm:p-12 relative overflow-hidden"
+              data-l="[ imagen · proceso · kamikaze 2026 ]"
+            >
+              <div className="flex justify-between items-start z-10">
+                <div className="text-xs font-mono tracking-[0.2em] uppercase font-bold">
+                  Colectivo artístico — proceso & materia
+                </div>
+                <div className="hidden sm:flex items-center gap-2 font-mono text-[11px] uppercase bg-[#FFD41D] border border-[#E52E33] px-3 py-1">
+                  <span>Temporada 06</span>
+                  <span>·</span>
+                  <span>Inscripciones Abiertas</span>
+                </div>
+              </div>
+
+              <div className="my-auto py-8 z-10">
+                <h1 className="brand-title text-7xl sm:text-9xl md:text-[140px] font-normal leading-[0.82] tracking-[-0.03em]">
+                  hacer<br />juntos
+                </h1>
+                <p className="text-sm sm:text-base md:text-lg max-w-xl mt-6">
+                  Espacio autogestivo de talleres, investigación en cerámica, dibujo, sonido y gráfica editorial.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-[#E52E33]/30 z-10">
+                <a href="#talleres" className="btn-brand-inverse px-6 py-3 font-mono text-xs uppercase tracking-widest font-bold flex items-center gap-2">
+                  <span>Explorar Talleres & Cursos</span>
+                  <Icon name="arrowDown" className="w-3.5 h-3.5" />
+                </a>
+                <a href="#bitacora" className="btn-brand px-6 py-3 font-mono text-xs uppercase tracking-widest font-bold flex items-center gap-2">
+                  <Icon name="youtube" className="w-3.5 h-3.5 text-red-600" />
+                  <span>Ver Bitácora Audiovisual</span>
+                </a>
+                <div className="text-xs font-mono ml-auto hidden lg:block">
+                  Billetera vinculada: <strong>{walletConfig.mpAlias}</strong>
+                </div>
+              </div>
+            </section>
+
+            {/* MANIFIESTO */}
+            <section id="manifiesto" className="border-b border-[#E52E33] p-6 sm:p-12 bg-[#FFD41D]">
+              <div className="max-w-4xl space-y-6">
+                <div className="text-xs font-mono tracking-[0.2em] uppercase font-bold opacity-80">
+                  [ 01. Manifiesto & Principios ]
+                </div>
+                <h2 className="text-3xl sm:text-5xl font-normal brand-title leading-tight">
+                  No producimos objetos; activamos procesos colectivos.
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm sm:text-base leading-relaxed">
+                  <p>
+                    Kamikaze es un taller abierto y laboratorio autogestivo en Buenos Aires. Creemos en la experimentación directa con la materia: el barro que se calcina al fuego, el papel que se mancha de tinta risográfica y el circuito que ruge en feedback.
+                  </p>
+                  <p>
+                    Todo arancel recaudado financia becas comunitarias, mantenimiento de hornos de leña, herramientas de código abierto y publicaciones de circulación libre.
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            {/* EJES */}
+            <section id="ejes" className="border-b border-[#E52E33]">
+              <div className="p-6 sm:p-12 border-b border-[#E52E33]/30">
+                <div className="text-xs font-mono tracking-[0.2em] uppercase font-bold opacity-80">
+                  [ 02. Ejes de Investigación ]
+                </div>
+                <h2 className="text-2xl sm:text-4xl font-normal brand-title mt-2">
+                  Cuatro territorios materiales
+                </h2>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-[#E52E33]">
+                <div className="p-6 sm:p-8 space-y-3">
+                  <span className="font-mono text-xs font-bold">[ Eje A ]</span>
+                  <h3 className="text-xl font-bold brand-title">Cerámica & Quemas</h3>
+                  <p className="text-xs opacity-90">Arcillas locales, hornos de tiro directo a leña y reducción experimental con hojas secas.</p>
+                </div>
+                <div className="p-6 sm:p-8 space-y-3">
+                  <span className="font-mono text-xs font-bold">[ Eje B ]</span>
+                  <h3 className="text-xl font-bold brand-title">Gráfica & Riso</h3>
+                  <p className="text-xs opacity-90">Autoedición de fanzines, tipografía de plomo y duplicación analógica de bajo costo.</p>
+                </div>
+                <div className="p-6 sm:p-8 space-y-3">
+                  <span className="font-mono text-xs font-bold">[ Eje C ]</span>
+                  <h3 className="text-xl font-bold brand-title">Sonido DIY</h3>
+                  <p className="text-xs opacity-90">Circuit bending, sintetizadores en chips CMOS y grabaciones de campo en cinta magnética.</p>
+                </div>
+                <div className="p-6 sm:p-8 space-y-3">
+                  <span className="font-mono text-xs font-bold">[ Eje D ]</span>
+                  <h3 className="text-xl font-bold brand-title">Dibujo Crudo</h3>
+                  <p className="text-xs opacity-90">Gran formato, barras monumentales de carbón y trazo corporal sobre papel continuo.</p>
+                </div>
+              </div>
+            </section>
+
+            {/* BITÁCORA */}
+            <section id="bitacora" className="border-b border-[#E52E33] p-6 sm:p-12 bg-[#f0c510]">
+              <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-4 mb-8">
+                <div>
+                  <div className="text-xs font-mono tracking-[0.2em] uppercase font-bold opacity-80">
+                    [ 03. Bitácora Audiovisual & Escritos ]
+                  </div>
+                  <h2 className="text-3xl sm:text-5xl font-normal brand-title mt-2">
+                    Procesos en directo
+                  </h2>
+                </div>
+                <button
+                  onClick={() => setIsAdminOpen(true)}
+                  className="btn-brand px-3 py-1.5 text-xs font-mono uppercase font-bold flex items-center gap-1.5"
+                >
+                  <Icon name="youtube" className="w-4 h-4 text-red-600" />
+                  <span>Gestionar Video YouTube</span>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-2 border border-[#E52E33] bg-black overflow-hidden relative shadow-lg">
+                  <div className="aspect-video w-full">
+                    <iframe
+                      src={`https://www.youtube.com/embed/${getYouTubeId(bitacoraVideo.youtubeUrl)}?rel=0`}
+                      title={bitacoraVideo.title}
+                      className="w-full h-full border-0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                  <div className="p-4 bg-[#FFD41D] border-t border-[#E52E33] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                    <div>
+                      <h4 className="font-bold font-mono text-sm uppercase">{bitacoraVideo.title}</h4>
+                      <p className="text-xs opacity-80">{bitacoraVideo.subtitle}</p>
+                    </div>
+                    <span className="font-mono text-xs bg-[#E52E33] text-[#FFD41D] px-2 py-0.5 font-bold">
+                      {bitacoraVideo.duration}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h4 className="font-mono text-xs uppercase font-bold tracking-widest border-b border-[#E52E33] pb-2">
+                    Ensayos & Textos de Laboratorio
+                  </h4>
+                  {BITACORA_DATA.map(item => (
+                    <div key={item.id} className="p-4 border border-[#E52E33] bg-[#FFD41D] space-y-2">
+                      <div className="flex justify-between items-center text-[10px] font-mono uppercase">
+                        <span className="bg-[#E52E33] text-[#FFD41D] px-1.5 py-0.5 font-bold">{item.category}</span>
+                        <span>{item.date} · {item.readTime}</span>
+                      </div>
+                      <h5 className="font-bold text-sm leading-tight">{item.title}</h5>
+                      <p className="text-xs opacity-90 line-clamp-2">{item.excerpt}</p>
+                      <div className="text-[11px] font-mono opacity-75">Por: {item.author}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            {/* TALLERES */}
+            <section id="talleres" className="border-b border-[#E52E33] p-6 sm:p-12">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8 border-b border-[#E52E33] pb-6">
+                <div>
+                  <div className="text-xs font-mono tracking-[0.2em] uppercase font-bold opacity-80">
+                    [ 04. Formación Continua & Oficios ]
+                  </div>
+                  <h2 className="text-3xl sm:text-5xl font-normal brand-title mt-2">
+                    Talleres & Clínicas 2026
+                  </h2>
+                  <p className="text-sm opacity-90 mt-2">
+                    Cupos reducidos para asegurar seguimiento individual y uso intensivo de maquinaria.
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  {['todos', 'intensivo', 'cuatrimestral', 'clinica', 'taller'].map(filter => (
+                    <button
+                      key={filter}
+                      onClick={() => setActiveFilter(filter)}
+                      className={`px-3 py-1.5 text-xs font-mono uppercase font-bold border border-[#E52E33] cursor-pointer ${
+                        activeFilter === filter ? 'bg-[#E52E33] text-[#FFD41D]' : 'bg-[#FFD41D] text-[#E52E33] hover:bg-[#E52E33]/10'
+                      }`}
+                    >
+                      {filter}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {filteredWorkshops.map(ws => (
+                  <div key={ws.id} className="border border-[#E52E33] bg-[#f0c510] flex flex-col justify-between p-6 sm:p-8 space-y-6">
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-start gap-2">
+                        <span className="font-mono text-xs uppercase bg-[#E52E33] text-[#FFD41D] px-2 py-0.5 font-bold">
+                          {ws.format} · {ws.category}
+                        </span>
+                        <span className={`font-mono text-xs px-2 py-0.5 font-bold border border-[#E52E33] ${
+                          ws.availableSpots <= 2 ? 'bg-[#E52E33] text-[#FFD41D] animate-pulse' : 'bg-[#FFD41D]'
+                        }`}>
+                          {ws.availableSpots > 0 ? `Quedan ${ws.availableSpots} de ${ws.totalSpots} cupos` : 'AGOTADO'}
+                        </span>
+                      </div>
+
+                      <h3 className="text-2xl sm:text-3xl font-bold brand-title leading-tight">
+                        {ws.title}
+                      </h3>
+
+                      <p className="text-xs sm:text-sm leading-relaxed opacity-95">
+                        {ws.description}
+                      </p>
+
+                      <div className="space-y-1.5 text-xs font-mono pt-2 border-t border-[#E52E33]/30">
+                        <div><strong>Docente:</strong> {ws.instructor}</div>
+                        <div><strong>Fechas:</strong> {ws.dateRange}</div>
+                        <div><strong>Horario:</strong> {ws.schedule}</div>
+                        <div><strong>Sede:</strong> {ws.location}</div>
+                      </div>
+                    </div>
+
+                    <div className="pt-4 border-t border-[#E52E33] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                      <div>
+                        <div className="text-2xl font-mono font-bold">
+                          ${ws.price.toLocaleString('es-AR')}
+                        </div>
+                        <div className="text-xs font-mono opacity-85">
+                          Socixs: ${ws.memberPrice.toLocaleString('es-AR')} (o 50% seña)
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 w-full sm:w-auto">
+                        <button
+                          onClick={() => setSelectedWorkshopForDetail(ws)}
+                          className="btn-brand px-3 py-2 text-xs font-mono uppercase font-bold flex-1 sm:flex-none text-center"
+                        >
+                          Ver Programa
+                        </button>
+                        <button
+                          onClick={() => setSelectedWorkshopForEnrollment(ws)}
+                          disabled={ws.availableSpots === 0}
+                          className="btn-brand-inverse px-4 py-2 text-xs font-mono uppercase font-bold flex-1 sm:flex-none text-center disabled:opacity-40"
+                        >
+                          {ws.availableSpots > 0 ? 'Inscribirse' : 'Sin Cupo'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* ARTISTAS */}
+            <section id="artistas" className="border-b border-[#E52E33] p-6 sm:p-12 bg-[#FFD41D]">
+              <div className="text-xs font-mono tracking-[0.2em] uppercase font-bold opacity-80 mb-2">
+                [ 05. Residentes & Docentes ]
+              </div>
+              <h2 className="text-3xl sm:text-5xl font-normal brand-title mb-8">
+                Comunidad Activa
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[
+                  { name: 'Lucía Soria', role: 'Cerámica & Quemas', bio: 'Investigadora de sedimentos y quemas a leña.' },
+                  { name: 'Martín Pescador', role: 'Gráfica & Fanzines', bio: 'Impresor risográfico y tipógrafo analógico.' },
+                  { name: 'Franco Valenzuela', role: 'Audio & Circuit Bending', bio: 'Luthier electrónico y compositor de ruido.' },
+                  { name: 'Julieta Mansilla', role: 'Dibujo & Performance', bio: 'Artista visual exploradora del gran formato.' }
+                ].map((art, idx) => (
+                  <div key={idx} className="border border-[#E52E33] p-5 bg-[#f0c510] space-y-2">
+                    <div className="w-8 h-8 rounded-full bg-[#E52E33] text-[#FFD41D] flex items-center justify-center font-mono font-bold text-sm">
+                      {art.name[0]}
+                    </div>
+                    <h4 className="font-bold font-mono text-base">{art.name}</h4>
+                    <div className="text-xs font-mono uppercase bg-[#E52E33] text-[#FFD41D] inline-block px-1.5 py-0.5">
+                      {art.role}
+                    </div>
+                    <p className="text-xs opacity-90">{art.bio}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* EVENTOS */}
+            <section id="eventos" className="border-b border-[#E52E33] p-6 sm:p-12 bg-[#f0c510]">
+              <div className="text-xs font-mono tracking-[0.2em] uppercase font-bold opacity-80 mb-2">
+                [ 06. Agenda Comunitaria ]
+              </div>
+              <h2 className="text-3xl sm:text-5xl font-normal brand-title mb-8">
+                Encuentros & Ferias Abiertas
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {EVENTS_DATA.map(ev => (
+                  <div key={ev.id} className="border border-[#E52E33] p-6 bg-[#FFD41D] flex flex-col justify-between space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-xs font-mono font-bold">
+                        <Icon name="calendar" className="w-3.5 h-3.5" />
+                        <span>{ev.date} · {ev.time}</span>
+                      </div>
+                      <h3 className="text-2xl font-bold brand-title">{ev.title}</h3>
+                      <p className="text-xs sm:text-sm opacity-90">{ev.description}</p>
+                      <div className="text-xs font-mono opacity-80 flex items-center gap-1.5 pt-1">
+                        <Icon name="mapPin" className="w-3.5 h-3.5" />
+                        <span>{ev.location}</span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setRsvpEvent(ev)}
+                      className="btn-brand-inverse w-full py-2.5 text-xs font-mono uppercase font-bold"
+                    >
+                      Anotarse / Confirmar Asistencia
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* SOSTÉN */}
+            <section id="sumate" className="border-b border-[#E52E33] p-6 sm:p-12 bg-[#FFD41D]">
+              <div className="max-w-3xl space-y-6">
+                <div className="text-xs font-mono tracking-[0.2em] uppercase font-bold opacity-80">
+                  [ 07. Autogestión & Billetera ]
+                </div>
+                <h2 className="text-3xl sm:text-5xl font-normal brand-title">
+                  Fondo de Sostén Colectivo
+                </h2>
+                <p className="text-sm sm:text-base opacity-95 leading-relaxed">
+                  Podés apoyar la compra de leña para los hornos comunitarios, tintas para el taller gráfico o postular un proyecto artístico para co-gestionar en nuestro espacio.
+                </p>
+
+                <div className="p-6 border border-[#E52E33] bg-[#f0c510] space-y-4">
+                  <h4 className="font-mono text-sm font-bold uppercase">Datos Billetera Mercado Pago & Banco</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono">
+                    <div className="p-3 bg-[#FFD41D] border border-[#E52E33]/60 flex justify-between items-center">
+                      <div>
+                        <div className="opacity-70 text-[10px]">ALIAS MP</div>
+                        <div className="font-bold font-mono">{walletConfig.mpAlias}</div>
+                      </div>
+                      <button onClick={() => copyToClipboard(walletConfig.mpAlias, 'Alias')} className="btn-brand p-1.5">
+                        <Icon name="copy" className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
+                    <div className="p-3 bg-[#FFD41D] border border-[#E52E33]/60 flex justify-between items-center">
+                      <div>
+                        <div className="opacity-70 text-[10px]">CVU / MERCADO PAGO</div>
+                        <div className="font-bold font-mono truncate max-w-[150px]">{walletConfig.mpCvu}</div>
+                      </div>
+                      <button onClick={() => copyToClipboard(walletConfig.mpCvu, 'CVU')} className="btn-brand p-1.5">
+                        <Icon name="copy" className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                  {copiedText && (
+                    <div className="text-xs font-mono font-bold bg-[#E52E33] text-[#FFD41D] px-2 py-1 inline-block">
+                      ¡{copiedText} copiado al portapapeles!
+                    </div>
+                  )}
+
+                  <div className="flex flex-wrap gap-3 pt-2">
+                    <button
+                      onClick={() => setIsProposalOpen(true)}
+                      className="btn-brand-inverse px-4 py-2 text-xs font-mono uppercase font-bold"
+                    >
+                      Proponer Taller o Residencia
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* FOOTER */}
+            <footer className="px-6 sm:px-12 py-10 bg-[#f0c510] border-t border-[#E52E33] space-y-6">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-[#E52E33]/40 pb-6">
+                <div className="space-y-1">
+                  <KamikazeLogo size="sm" />
+                  <p className="text-xs font-mono opacity-85 mt-2">
+                    Colectivo artístico, investigación & talleres formativos · 2026
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-6 text-xs font-mono">
+                  <div className="flex items-center gap-1.5">
+                    <Icon name="mapPin" className="w-3.5 h-3.5" />
+                    <span>{walletConfig.atelierAddress}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Icon name="mail" className="w-3.5 h-3.5" />
+                    <a href={`mailto:${walletConfig.contactEmail}`} className="underline">{walletConfig.contactEmail}</a>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Icon name="phone" className="w-3.5 h-3.5" />
+                    <span>{walletConfig.whatsappNumber}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-mono uppercase tracking-widest opacity-80">
+                <span>www.kamikaze.xyz · Proyecto Completo HTML Autónomo</span>
+                <div className="flex items-center gap-4">
+                  <button onClick={() => setIsStudentOpen(true)} className="underline cursor-pointer">
+                    [ Portal Alumnxs ]
+                  </button>
+                  <span>·</span>
+                  <button onClick={() => setIsAdminOpen(true)} className="underline cursor-pointer">
+                    [ Acceso Administrador ]
+                  </button>
+                </div>
+              </div>
+            </footer>
+
+          </div>
+
+          {/* DETAIL MODAL */}
+          {selectedWorkshopForDetail && (
+            <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+              <div className="bg-[#FFD41D] text-[#E52E33] border-2 border-[#E52E33] max-w-2xl w-full p-6 sm:p-8 space-y-6 max-h-[90vh] overflow-y-auto">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <span className="text-xs font-mono uppercase bg-[#E52E33] text-[#FFD41D] px-2 py-0.5 font-bold">
+                      {selectedWorkshopForDetail.format} · {selectedWorkshopForDetail.category}
+                    </span>
+                    <h3 className="text-2xl sm:text-4xl font-bold brand-title mt-2 leading-tight">
+                      {selectedWorkshopForDetail.title}
+                    </h3>
+                  </div>
+                  <button onClick={() => setSelectedWorkshopForDetail(null)} className="btn-brand p-1.5">
+                    <Icon name="close" className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <p className="text-sm sm:text-base leading-relaxed">
+                  {selectedWorkshopForDetail.description}
+                </p>
+
+                <div className="space-y-3 border-t border-b border-[#E52E33]/40 py-4">
+                  <h4 className="font-mono text-xs font-bold uppercase tracking-wider">Programa & Contenidos:</h4>
+                  <ul className="space-y-2 text-xs sm:text-sm">
+                    {selectedWorkshopForDetail.syllabus.map((line, idx) => (
+                      <li key={idx} className="flex items-start gap-2">
+                        <span className="font-mono font-bold text-[#E52E33]">0{idx+1}.</span>
+                        <span>{line}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono">
+                  <div className="p-3 bg-[#f0c510] border border-[#E52E33]/40">
+                    <strong>Materiales Incluidos:</strong>
+                    <p className="mt-1 opacity-90">{selectedWorkshopForDetail.materialsIncluded}</p>
+                  </div>
+                  <div className="p-3 bg-[#f0c510] border border-[#E52E33]/40">
+                    <strong>Requisitos / Qué traer:</strong>
+                    <p className="mt-1 opacity-90">{selectedWorkshopForDetail.requirements}</p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-t border-[#E52E33]">
+                  <div>
+                    <div className="text-2xl font-mono font-bold">${selectedWorkshopForDetail.price.toLocaleString('es-AR')}</div>
+                    <div className="text-xs font-mono opacity-80">Socixs: ${selectedWorkshopForDetail.memberPrice.toLocaleString('es-AR')}</div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      const ws = selectedWorkshopForDetail;
+                      setSelectedWorkshopForDetail(null);
+                      setSelectedWorkshopForEnrollment(ws);
+                    }}
+                    className="btn-brand-inverse w-full sm:w-auto px-6 py-3 font-mono text-xs uppercase font-bold"
+                  >
+                    Inscribirme a este taller →
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ENROLLMENT MODAL */}
+          {selectedWorkshopForEnrollment && (
+            <EnrollmentCheckoutModal
+              workshop={selectedWorkshopForEnrollment}
+              walletConfig={walletConfig}
+              currentUser={currentUser}
+              onClose={() => setSelectedWorkshopForEnrollment(null)}
+              onSuccess={(enr) => {
+                handleEnrollmentSuccess(enr);
+                setSelectedWorkshopForEnrollment(null);
+              }}
+            />
+          )}
+
+          {/* STUDENT PORTAL */}
+          {isStudentOpen && (
+            <StudentPortalView
+              currentUser={currentUser}
+              enrollments={enrollments}
+              workshops={workshops}
+              walletConfig={walletConfig}
+              onClose={() => setIsStudentOpen(false)}
+              onLogin={(user) => setCurrentUser(user)}
+              onLogout={() => setCurrentUser(null)}
+            />
+          )}
+
+          {/* ADMIN PANEL */}
+          {isAdminOpen && (
+            <AdminPanelView
+              workshops={workshops}
+              enrollments={enrollments}
+              walletConfig={walletConfig}
+              bitacoraVideo={bitacoraVideo}
+              onClose={() => setIsAdminOpen(false)}
+              onUpdateWorkshops={(newWs) => setWorkshops(newWs)}
+              onUpdateEnrollments={(newEnrs) => setEnrollments(newEnrs)}
+              onUpdateWallet={(newW) => setWalletConfig(newW)}
+              onUpdateVideo={(newV) => setBitacoraVideo(newV)}
+            />
+          )}
+
+          {/* RSVP EVENT */}
+          {rsvpEvent && (
+            <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+              <div className="bg-[#FFD41D] text-[#E52E33] border-2 border-[#E52E33] max-w-md w-full p-6 space-y-4">
+                <div className="flex justify-between items-start">
+                  <h3 className="text-xl font-bold brand-title">Anotarse al Encuentro</h3>
+                  <button onClick={() => setRsvpEvent(null)} className="btn-brand p-1">
+                    <Icon name="close" className="w-4 h-4" />
+                  </button>
+                </div>
+                <p className="text-xs">{rsvpEvent.title} · {rsvpEvent.date}</p>
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  alert(`¡Gracias ${e.target.name.value}! Tu lugar quedó reservado.`);
+                  setRsvpEvent(null);
+                }} className="space-y-3">
+                  <input required name="name" placeholder="Tu nombre y apellido" className="w-full p-2 border border-[#E52E33] bg-[#f0c510] text-xs font-mono" />
+                  <input required name="email" type="email" placeholder="Tu correo electrónico" className="w-full p-2 border border-[#E52E33] bg-[#f0c510] text-xs font-mono" />
+                  <button type="submit" className="btn-brand-inverse w-full py-2 text-xs font-mono uppercase font-bold">
+                    Confirmar Asistencia Libre
+                  </button>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* PROPOSE WORKSHOP */}
+          {isProposalOpen && (
+            <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+              <div className="bg-[#FFD41D] text-[#E52E33] border-2 border-[#E52E33] max-w-lg w-full p-6 space-y-4">
+                <div className="flex justify-between items-start">
+                  <h3 className="text-xl font-bold brand-title">Proponer Taller o Residencia</h3>
+                  <button onClick={() => setIsProposalOpen(false)} className="btn-brand p-1">
+                    <Icon name="close" className="w-4 h-4" />
+                  </button>
+                </div>
+                <p className="text-xs opacity-90">Envianos tu proyecto pedagógico o artístico para evaluarlo colectivamente en la próxima asamblea.</p>
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  alert('¡Propuesta recibida! La revisaremos en la asamblea colectiva.');
+                  setIsProposalOpen(false);
+                }} className="space-y-3">
+                  <input required placeholder="Tu Nombre / Colectivo" className="w-full p-2 border border-[#E52E33] bg-[#f0c510] text-xs font-mono" />
+                  <input required type="email" placeholder="Correo electrónico" className="w-full p-2 border border-[#E52E33] bg-[#f0c510] text-xs font-mono" />
+                  <input required placeholder="Título del Taller / Residencia" className="w-full p-2 border border-[#E52E33] bg-[#f0c510] text-xs font-mono" />
+                  <textarea required rows="4" placeholder="Descripción resumida, necesidades de espacio y materiales..." className="w-full p-2 border border-[#E52E33] bg-[#f0c510] text-xs font-mono" />
+                  <button type="submit" className="btn-brand-inverse w-full py-2.5 text-xs font-mono uppercase font-bold">
+                    Enviar Propuesta a la Asamblea
+                  </button>
+                </form>
+              </div>
+            </div>
+          )}
+
+        </div>
+      );
+    }
+
+    function EnrollmentCheckoutModal({ workshop, walletConfig, currentUser, onClose, onSuccess }) {
+      const [step, setStep] = useState(1);
+      const [formData, setFormData] = useState({
+        name: currentUser?.name || '',
+        email: currentUser?.email || '',
+        phone: currentUser?.phone || '',
+        doc: currentUser?.doc || '',
+        isMember: currentUser?.isMember || false
+      });
+      const [paymentOption, setPaymentOption] = useState('total');
+      const [paymentMethod, setPaymentMethod] = useState('mercadopago');
+      const [receiptName, setReceiptName] = useState('');
+      const [ticketPass, setTicketPass] = useState(null);
+
+      const finalAmount = formData.isMember ? workshop.memberPrice : workshop.price;
+      const amountToPay = paymentOption === 'seña_50' ? Math.round(finalAmount / 2) : finalAmount;
+
+      const handleStep1 = (e) => {
+        e.preventDefault();
+        setStep(2);
+      };
+
+      const handleConfirmPayment = () => {
+        const passCode = 'KMKZ-2026-' + Math.random().toString(36).substring(2, 7).toUpperCase();
+        const newEnrollment = {
+          id: 'enr-' + Date.now(),
+          workshopId: workshop.id,
+          workshopTitle: workshop.title,
+          studentName: formData.name,
+          studentEmail: formData.email,
+          studentPhone: formData.phone,
+          studentDoc: formData.doc,
+          isMember: formData.isMember,
+          paymentOption,
+          amountPaid: amountToPay,
+          totalAmount: finalAmount,
+          paymentMethod,
+          paymentStatus: 'pendiente_verificacion',
+          receiptUrl: receiptName ? 'comprobante_subido.jpg' : undefined,
+          passCode,
+          createdAt: new Date().toISOString()
+        };
+
+        setTicketPass(newEnrollment);
+        setStep(3);
+      };
+
+      return (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-[#FFD41D] text-[#E52E33] border-2 border-[#E52E33] max-w-xl w-full p-6 sm:p-8 space-y-6 max-h-[90vh] overflow-y-auto">
+            
+            <div className="flex justify-between items-start border-b border-[#E52E33]/40 pb-4">
+              <div>
+                <span className="text-xs font-mono font-bold bg-[#E52E33] text-[#FFD41D] px-2 py-0.5">
+                  PASO {step} DE 3
+                </span>
+                <h3 className="text-xl sm:text-2xl font-bold brand-title mt-1 leading-tight">
+                  Inscripción: {workshop.title}
+                </h3>
+              </div>
+              <button onClick={onClose} className="btn-brand p-1.5">
+                <Icon name="close" className="w-5 h-5" />
+              </button>
+            </div>
+
+            {step === 1 && (
+              <form onSubmit={handleStep1} className="space-y-4">
+                <h4 className="font-mono text-sm font-bold uppercase">1. Datos del participante</h4>
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-xs font-mono font-bold block mb-1">Nombre Completo *</label>
+                    <input
+                      required
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      placeholder="Ej: Sofía Almada"
+                      className="w-full p-2.5 border border-[#E52E33] bg-[#f0c510] text-xs font-mono"
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-mono font-bold block mb-1">Email *</label>
+                      <input
+                        required
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        placeholder="tu@email.com"
+                        className="w-full p-2.5 border border-[#E52E33] bg-[#f0c510] text-xs font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-mono font-bold block mb-1">WhatsApp / Teléfono *</label>
+                      <input
+                        required
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        placeholder="+54 9 11 ..."
+                        className="w-full p-2.5 border border-[#E52E33] bg-[#f0c510] text-xs font-mono"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-xs font-mono font-bold block mb-1">DNI / Pasaporte *</label>
+                    <input
+                      required
+                      value={formData.doc}
+                      onChange={(e) => setFormData({ ...formData, doc: e.target.value })}
+                      placeholder="Para seguro y registro en sede"
+                      className="w-full p-2.5 border border-[#E52E33] bg-[#f0c510] text-xs font-mono"
+                    />
+                  </div>
+                  <label className="flex items-center gap-2 text-xs font-mono p-3 bg-[#f0c510] border border-[#E52E33]/50 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.isMember}
+                      onChange={(e) => setFormData({ ...formData, isMember: e.target.checked })}
+                      className="w-4 h-4 accent-[#E52E33]"
+                    />
+                    <span>Soy socix / estudiante recurrente de Kamikaze (aplica descuento)</span>
+                  </label>
+                </div>
+
+                <div className="flex justify-between items-center pt-4 border-t border-[#E52E33]">
+                  <div className="text-sm font-mono font-bold">
+                    Arancel: ${finalAmount.toLocaleString('es-AR')}
+                  </div>
+                  <button type="submit" className="btn-brand-inverse px-6 py-2.5 text-xs font-mono uppercase font-bold">
+                    Continuar al Pago →
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {step === 2 && (
+              <div className="space-y-4">
+                <h4 className="font-mono text-sm font-bold uppercase">2. Selección de Pago & Billetera</h4>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setPaymentOption('total')}
+                    className={`p-3 border text-left font-mono text-xs ${
+                      paymentOption === 'total' ? 'bg-[#E52E33] text-[#FFD41D] border-[#E52E33]' : 'bg-[#f0c510] border-[#E52E33]/60'
+                    }`}
+                  >
+                    <div className="font-bold">Pago Total 100%</div>
+                    <div className="text-sm font-bold mt-1">${finalAmount.toLocaleString('es-AR')}</div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setPaymentOption('seña_50')}
+                    className={`p-3 border text-left font-mono text-xs ${
+                      paymentOption === 'seña_50' ? 'bg-[#E52E33] text-[#FFD41D] border-[#E52E33]' : 'bg-[#f0c510] border-[#E52E33]/60'
+                    }`}
+                  >
+                    <div className="font-bold">Seña 50% (Reserva)</div>
+                    <div className="text-sm font-bold mt-1">${Math.round(finalAmount/2).toLocaleString('es-AR')}</div>
+                  </button>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-mono font-bold block">Medio de pago:</label>
+                  <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+                    {['mercadopago', 'transferencia', 'efectivo_sede', 'beca'].map((m) => (
+                      <button
+                        key={m}
+                        type="button"
+                        onClick={() => setPaymentMethod(m)}
+                        className={`p-2.5 border uppercase font-bold text-center ${
+                          paymentMethod === m ? 'bg-[#E52E33] text-[#FFD41D] border-[#E52E33]' : 'bg-[#f0c510] border-[#E52E33]/40'
+                        }`}
+                      >
+                        {m.replace('_', ' ')}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="p-4 bg-[#f0c510] border border-[#E52E33] space-y-2 text-xs font-mono">
+                  <div className="font-bold uppercase text-[#E52E33]">[ Transferir a cuenta oficial ]</div>
+                  <div><strong>Titular:</strong> {walletConfig.accountHolder}</div>
+                  <div><strong>Alias MP:</strong> <span className="bg-[#FFD41D] px-1 py-0.5 font-bold">{walletConfig.mpAlias}</span></div>
+                  <div><strong>CVU:</strong> {walletConfig.mpCvu}</div>
+                  <div><strong>Monto a transferir:</strong> <span className="font-bold">${amountToPay.toLocaleString('es-AR')}</span></div>
+                </div>
+
+                <div className="p-3 bg-[#f0c510] border border-dashed border-[#E52E33] text-center space-y-1">
+                  <label className="text-xs font-mono cursor-pointer block">
+                    <span className="font-bold underline">Adjuntar Comprobante de Pago</span>
+                    <input
+                      type="file"
+                      className="hidden"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          setReceiptName(e.target.files[0].name);
+                        }
+                      }}
+                    />
+                  </label>
+                  {receiptName ? (
+                    <div className="text-[11px] font-mono font-bold text-green-800">
+                      ✓ Archivo cargado: {receiptName}
+                    </div>
+                  ) : (
+                    <div className="text-[10px] opacity-70">PNG, JPG o PDF de la transferencia</div>
+                  )}
+                </div>
+
+                <div className="flex justify-between items-center pt-4 border-t border-[#E52E33]">
+                  <button onClick={() => setStep(1)} className="text-xs font-mono underline font-bold">
+                    ← Volver a datos
+                  </button>
+                  <button
+                    onClick={handleConfirmPayment}
+                    className="btn-brand-inverse px-6 py-2.5 text-xs font-mono uppercase font-bold"
+                  >
+                    Confirmar & Generar Pase QR →
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {step === 3 && ticketPass && (
+              <div className="space-y-6 text-center">
+                <div className="w-12 h-12 rounded-full bg-[#E52E33] text-[#FFD41D] mx-auto flex items-center justify-center">
+                  <Icon name="check" className="w-6 h-6" />
+                </div>
+                <div>
+                  <h4 className="text-2xl font-bold brand-title">¡Reserva Registrada!</h4>
+                  <p className="text-xs opacity-90 mt-1">
+                    Tu pase digital ha sido emitido. Presentalo al ingresar a la primera clase.
+                  </p>
+                </div>
+
+                <div className="p-6 bg-[#f0c510] border-2 border-[#E52E33] space-y-4 text-left font-mono">
+                  <div className="flex justify-between items-start border-b border-[#E52E33]/40 pb-2">
+                    <div>
+                      <div className="text-[10px] opacity-70">CÓDIGO DE ACCESO</div>
+                      <div className="text-lg font-bold text-[#E52E33]">{ticketPass.passCode}</div>
+                    </div>
+                    <span className="text-[10px] bg-[#E52E33] text-[#FFD41D] px-2 py-0.5 font-bold">
+                      TALLER OFICIAL
+                    </span>
+                  </div>
+
+                  <div className="text-xs space-y-1">
+                    <div><strong>Participante:</strong> {ticketPass.studentName}</div>
+                    <div><strong>Taller:</strong> {ticketPass.workshopTitle}</div>
+                    <div><strong>Monto Registrado:</strong> ${ticketPass.amountPaid.toLocaleString('es-AR')} ({ticketPass.paymentOption})</div>
+                    <div><strong>Estado:</strong> Pendiente de Acreditación</div>
+                  </div>
+
+                  <div className="pt-2 flex items-center justify-center p-3 bg-white text-black border border-black/30">
+                    <div className="text-center font-mono text-[10px]">
+                      <div className="font-bold">[ QR VALIDATION TOKEN ]</div>
+                      <div className="text-xs font-mono tracking-widest mt-1">{ticketPass.passCode}</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <button
+                    onClick={() => {
+                      onSuccess(ticketPass);
+                    }}
+                    className="btn-brand-inverse flex-1 py-3 text-xs font-mono uppercase font-bold"
+                  >
+                    Guardar & Ver en Mi Portal
+                  </button>
+                </div>
+              </div>
+            )}
+
+          </div>
+        </div>
+      );
+    }
+
+    function StudentPortalView({ currentUser, enrollments, workshops, walletConfig, onClose, onLogin, onLogout }) {
+      const [emailInput, setEmailInput] = useState('');
+      const [nameInput, setNameInput] = useState('');
+
+      const myEnrollments = currentUser
+        ? enrollments.filter(e => e.studentEmail?.toLowerCase() === currentUser.email?.toLowerCase())
+        : [];
+
+      return (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-[#FFD41D] text-[#E52E33] border-2 border-[#E52E33] max-w-2xl w-full p-6 sm:p-8 space-y-6 max-h-[90vh] overflow-y-auto">
+            
+            <div className="flex justify-between items-start border-b border-[#E52E33]/40 pb-4">
+              <div>
+                <span className="text-xs font-mono uppercase bg-[#E52E33] text-[#FFD41D] px-2 py-0.5 font-bold">
+                  ESPACIO PERSONAL
+                </span>
+                <h3 className="text-2xl sm:text-3xl font-bold brand-title mt-1">
+                  Portal de Alumnxs & Participantes
+                </h3>
+              </div>
+              <button onClick={onClose} className="btn-brand p-1.5">
+                <Icon name="close" className="w-5 h-5" />
+              </button>
+            </div>
+
+            {!currentUser ? (
+              <div className="space-y-6">
+                <p className="text-xs sm:text-sm">
+                  Ingresá con tu correo electrónico o cuenta de Google para consultar tus inscripciones, estados de pago y pases de acceso con código QR.
+                </p>
+
+                <button
+                  onClick={() => {
+                    onLogin({
+                      name: 'Florencia Romero',
+                      email: 'florencia.romero@gmail.com',
+                      phone: '+54 9 11 4455-8899',
+                      doc: '38.994.120',
+                      isMember: true
+                    });
+                  }}
+                  className="w-full p-3 bg-white text-gray-800 border border-[#E52E33] font-mono text-xs font-bold flex items-center justify-center gap-2 hover:bg-gray-50 shadow-xs cursor-pointer"
+                >
+                  <span>Ingresar con Google (1-Clic Demo)</span>
+                </button>
+
+                <div className="text-center text-xs font-mono opacity-60">— O INGRESÁ CON TU EMAIL —</div>
+
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  onLogin({
+                    name: nameInput || 'Estudiante Kamikaze',
+                    email: emailInput,
+                    phone: '',
+                    doc: '',
+                    isMember: false
+                  });
+                }} className="space-y-3">
+                  <input
+                    required
+                    placeholder="Tu Nombre"
+                    value={nameInput}
+                    onChange={(e) => setNameInput(e.target.value)}
+                    className="w-full p-2.5 border border-[#E52E33] bg-[#f0c510] text-xs font-mono"
+                  />
+                  <input
+                    required
+                    type="email"
+                    placeholder="Tu correo electrónico"
+                    value={emailInput}
+                    onChange={(e) => setEmailInput(e.target.value)}
+                    className="w-full p-2.5 border border-[#E52E33] bg-[#f0c510] text-xs font-mono"
+                  />
+                  <button type="submit" className="btn-brand-inverse w-full py-2.5 text-xs font-mono uppercase font-bold">
+                    Ingresar a Mi Panel
+                  </button>
+                </form>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <div className="p-4 bg-[#f0c510] border border-[#E52E33] flex justify-between items-center">
+                  <div>
+                    <h4 className="font-bold font-mono text-base">{currentUser.name}</h4>
+                    <div className="text-xs font-mono opacity-80">{currentUser.email}</div>
+                    {currentUser.isMember && (
+                      <span className="text-[10px] bg-green-800 text-white px-1.5 py-0.2 font-mono font-bold mt-1 inline-block">
+                        SOCIX ACTIVO
+                      </span>
+                    )}
+                  </div>
+                  <button onClick={onLogout} className="btn-brand px-3 py-1 text-xs font-mono font-bold">
+                    Cerrar Sesión
+                  </button>
+                </div>
+
+                <div className="space-y-3">
+                  <h4 className="font-mono text-xs uppercase font-bold tracking-wider">
+                    Mis Inscripciones ({myEnrollments.length})
+                  </h4>
+
+                  {myEnrollments.length === 0 ? (
+                    <div className="p-6 bg-[#f0c510] border border-dashed border-[#E52E33] text-center text-xs font-mono">
+                      No tenés inscripciones activas registradas con este email.
+                    </div>
+                  ) : (
+                    myEnrollments.map((enr) => (
+                      <div key={enr.id} className="p-4 border border-[#E52E33] bg-[#f0c510] space-y-2 font-mono text-xs">
+                        <div className="flex justify-between items-start">
+                          <span className="font-bold text-sm text-[#E52E33]">{enr.workshopTitle}</span>
+                          <span className="bg-[#E52E33] text-[#FFD41D] px-1.5 py-0.5 text-[10px] font-bold uppercase">
+                            {enr.paymentStatus.replace('_', ' ')}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-[11px] opacity-90">
+                          <div><strong>Pase QR:</strong> {enr.passCode}</div>
+                          <div><strong>Monto:</strong> ${enr.amountPaid.toLocaleString('es-AR')}</div>
+                          <div><strong>Fecha:</strong> {new Date(enr.createdAt).toLocaleDateString('es-AR')}</div>
+                          <div><strong>Modalidad:</strong> {enr.paymentOption}</div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+
+          </div>
+        </div>
+      );
+    }
+
+    function AdminPanelView({ workshops, enrollments, walletConfig, bitacoraVideo, onClose, onUpdateWorkshops, onUpdateEnrollments, onUpdateWallet, onUpdateVideo }) {
+      const [isAuthenticated, setIsAuthenticated] = useState(false);
+      const [userField, setUserField] = useState('');
+      const [passField, setPassField] = useState('');
+      const [activeTab, setActiveTab] = useState('inscripciones');
+      const [videoUrlInput, setVideoUrlInput] = useState(bitacoraVideo.youtubeUrl);
+      const [videoTitleInput, setVideoTitleInput] = useState(bitacoraVideo.title);
+
+      const handleLogin = (e) => {
+        e.preventDefault();
+        const validUsers = ['colectivokamizaze', 'colectivokamikaze', 'admin'];
+        if (validUsers.includes(userField.toLowerCase().trim()) && passField === 'kamikaze2026') {
+          setIsAuthenticated(true);
+        } else {
+          alert('Credenciales incorrectas. Usuario: colectivokamizaze / Pass: kamikaze2026');
+        }
+      };
+
+      const handleUpdateStatus = (id, status) => {
+        const updated = enrollments.map(e => e.id === id ? { ...e, paymentStatus: status } : e);
+        onUpdateEnrollments(updated);
+      };
+
+      const exportCSV = () => {
+        const rows = [
+          ['ID', 'Taller', 'Participante', 'Email', 'Telefono', 'DNI', 'Monto', 'Estado', 'Pase QR', 'Fecha'],
+          ...enrollments.map(e => [
+            e.id, e.workshopTitle, e.studentName, e.studentEmail, e.studentPhone, e.studentDoc, e.amountPaid, e.paymentStatus, e.passCode, e.createdAt
+          ])
+        ];
+        const csvContent = "data:text/csv;charset=utf-8," + rows.map(r => r.join(",")).join("\n");
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `inscripciones_kamikaze_${Date.now()}.csv`);
+        document.body.appendChild(link);
+        link.click();
+      };
+
+      return (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-[#FFD41D] text-[#E52E33] border-2 border-[#E52E33] max-w-4xl w-full p-6 sm:p-8 space-y-6 max-h-[92vh] overflow-y-auto">
+            
+            <div className="flex justify-between items-start border-b border-[#E52E33]/40 pb-4">
+              <div>
+                <span className="text-xs font-mono uppercase bg-[#E52E33] text-[#FFD41D] px-2 py-0.5 font-bold">
+                  GESTIÓN INTERNA
+                </span>
+                <h3 className="text-2xl sm:text-3xl font-bold brand-title mt-1">
+                  Panel de Administración Colectivo
+                </h3>
+              </div>
+              <button onClick={onClose} className="btn-brand p-1.5">
+                <Icon name="close" className="w-5 h-5" />
+              </button>
+            </div>
+
+            {!isAuthenticated ? (
+              <form onSubmit={handleLogin} className="max-w-sm mx-auto space-y-4 py-8">
+                <div className="text-xs font-mono text-center opacity-80">
+                  Ingreso exclusivo para integrantes de Kamikaze.
+                </div>
+                <input
+                  required
+                  placeholder="Usuario (colectivokamizaze)"
+                  value={userField}
+                  onChange={(e) => setUserField(e.target.value)}
+                  className="w-full p-2.5 border border-[#E52E33] bg-[#f0c510] text-xs font-mono"
+                />
+                <input
+                  required
+                  type="password"
+                  placeholder="Contraseña (kamikaze2026)"
+                  value={passField}
+                  onChange={(e) => setPassField(e.target.value)}
+                  className="w-full p-2.5 border border-[#E52E33] bg-[#f0c510] text-xs font-mono"
+                />
+                <button type="submit" className="btn-brand-inverse w-full py-2.5 text-xs font-mono uppercase font-bold">
+                  Ingresar al Sistema
+                </button>
+              </form>
+            ) : (
+              <div className="space-y-6">
+                <div className="flex flex-wrap gap-2 border-b border-[#E52E33] pb-2">
+                  {['inscripciones', 'talleres', 'youtube', 'billetera'].map((t) => (
+                    <button
+                      key={t}
+                      onClick={() => setActiveTab(t)}
+                      className={`px-3 py-1.5 text-xs font-mono uppercase font-bold border border-[#E52E33] ${
+                        activeTab === t ? 'bg-[#E52E33] text-[#FFD41D]' : 'bg-[#FFD41D]'
+                      }`}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
+
+                {activeTab === 'inscripciones' && (
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <div className="text-xs font-mono font-bold">
+                        Total Inscriptos: {enrollments.length}
+                      </div>
+                      <button onClick={exportCSV} className="btn-brand px-3 py-1 text-xs font-mono uppercase font-bold flex items-center gap-1.5">
+                        <Icon name="download" className="w-3.5 h-3.5" />
+                        <span>Exportar CSV</span>
+                      </button>
+                    </div>
+
+                    <div className="overflow-x-auto border border-[#E52E33]">
+                      <table className="w-full text-left font-mono text-xs">
+                        <thead className="bg-[#E52E33] text-[#FFD41D] uppercase">
+                          <tr>
+                            <th className="p-2">Participante</th>
+                            <th className="p-2">Taller</th>
+                            <th className="p-2">Monto</th>
+                            <th className="p-2">Pase QR</th>
+                            <th className="p-2">Estado</th>
+                            <th className="p-2">Acción</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-[#E52E33]/30 bg-[#f0c510]">
+                          {enrollments.length === 0 ? (
+                            <tr><td colSpan="6" className="p-4 text-center">No hay inscripciones registradas.</td></tr>
+                          ) : (
+                            enrollments.map((enr) => (
+                              <tr key={enr.id}>
+                                <td className="p-2">
+                                  <div className="font-bold">{enr.studentName}</div>
+                                  <div className="text-[10px] opacity-75">{enr.studentEmail} · {enr.studentPhone}</div>
+                                </td>
+                                <td className="p-2">{enr.workshopTitle}</td>
+                                <td className="p-2">${enr.amountPaid.toLocaleString('es-AR')}</td>
+                                <td className="p-2 font-bold">{enr.passCode}</td>
+                                <td className="p-2">
+                                  <span className="px-1.5 py-0.5 bg-[#E52E33] text-[#FFD41D] text-[10px] font-bold">
+                                    {enr.paymentStatus}
+                                  </span>
+                                </td>
+                                <td className="p-2">
+                                  <select
+                                    value={enr.paymentStatus}
+                                    onChange={(e) => handleUpdateStatus(enr.id, e.target.value)}
+                                    className="p-1 text-[11px] bg-[#FFD41D] border border-[#E52E33] font-mono"
+                                  >
+                                    <option value="pendiente_verificacion">Pendiente</option>
+                                    <option value="confirmado">Confirmado</option>
+                                    <option value="seña_50">Seña 50%</option>
+                                    <option value="cancelado">Cancelado</option>
+                                  </select>
+                                </td>
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === 'talleres' && (
+                  <div className="space-y-4">
+                    <div className="text-xs font-mono font-bold">Talleres Activos ({workshops.length})</div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {workshops.map((ws) => (
+                        <div key={ws.id} className="p-4 border border-[#E52E33] bg-[#f0c510] space-y-2 text-xs font-mono">
+                          <div className="flex justify-between">
+                            <span className="font-bold text-sm">{ws.title}</span>
+                            <span>{ws.availableSpots}/{ws.totalSpots} cupos</span>
+                          </div>
+                          <div>Arancel: ${ws.price.toLocaleString('es-AR')} | Socixs: ${ws.memberPrice.toLocaleString('es-AR')}</div>
+                          <div>Docente: {ws.instructor}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === 'youtube' && (
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    onUpdateVideo({
+                      ...bitacoraVideo,
+                      youtubeUrl: videoUrlInput,
+                      title: videoTitleInput
+                    });
+                    alert('¡Video de Bitácora actualizado en la Home!');
+                  }} className="space-y-4 max-w-md">
+                    <h4 className="font-mono text-xs uppercase font-bold">Cambiar Video de YouTube</h4>
+                    <div>
+                      <label className="text-xs font-mono font-bold block mb-1">Enlace de YouTube (Watch o Short):</label>
+                      <input
+                        required
+                        value={videoUrlInput}
+                        onChange={(e) => setVideoUrlInput(e.target.value)}
+                        placeholder="https://www.youtube.com/watch?v=..."
+                        className="w-full p-2 border border-[#E52E33] bg-[#f0c510] text-xs font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-mono font-bold block mb-1">Título del Video:</label>
+                      <input
+                        required
+                        value={videoTitleInput}
+                        onChange={(e) => setVideoTitleInput(e.target.value)}
+                        className="w-full p-2 border border-[#E52E33] bg-[#f0c510] text-xs font-mono"
+                      />
+                    </div>
+                    <button type="submit" className="btn-brand-inverse px-4 py-2 text-xs font-mono uppercase font-bold">
+                      Guardar Video en Bitácora
+                    </button>
+                  </form>
+                )}
+
+                {activeTab === 'billetera' && (
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    alert('¡Configuración de billetera guardada!');
+                  }} className="space-y-3 max-w-md text-xs font-mono">
+                    <h4 className="font-mono text-xs uppercase font-bold">Configuración de Cobro</h4>
+                    <div>
+                      <label className="font-bold block mb-1">Alias Mercado Pago:</label>
+                      <input
+                        value={walletConfig.mpAlias}
+                        onChange={(e) => onUpdateWallet({ ...walletConfig, mpAlias: e.target.value })}
+                        className="w-full p-2 border border-[#E52E33] bg-[#f0c510]"
+                      />
+                    </div>
+                    <div>
+                      <label className="font-bold block mb-1">CVU:</label>
+                      <input
+                        value={walletConfig.mpCvu}
+                        onChange={(e) => onUpdateWallet({ ...walletConfig, mpCvu: e.target.value })}
+                        className="w-full p-2 border border-[#E52E33] bg-[#f0c510]"
+                      />
+                    </div>
+                    <div>
+                      <label className="font-bold block mb-1">Email de Contacto:</label>
+                      <input
+                        value={walletConfig.contactEmail}
+                        onChange={(e) => onUpdateWallet({ ...walletConfig, contactEmail: e.target.value })}
+                        className="w-full p-2 border border-[#E52E33] bg-[#f0c510]"
+                      />
+                    </div>
+                    <button type="submit" className="btn-brand-inverse px-4 py-2 text-xs font-mono uppercase font-bold mt-2">
+                      Guardar Datos Billetera
+                    </button>
+                  </form>
+                )}
+
+              </div>
+            )}
+
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
 </html>
-
-
