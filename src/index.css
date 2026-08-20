@@ -1,0 +1,138 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --brand-yellow: #FFD41D;
+    --brand-red: #E52E33;
+    --brand-yellow-dark: #f0c510;
+    --brand-yellow-hatch: #e3b80e;
+  }
+
+  body {
+    background-color: #FFD41D;
+    color: #E52E33;
+    font-family: "Arial Narrow", "Helvetica Neue Condensed", "Roboto Condensed", -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+    letter-spacing: -0.01em;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, .brand-title {
+    font-family: 'Space Mono', 'Chivo Mono', 'VT323', monospace, sans-serif !important;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+  }
+}
+
+/* Texture hatching based on brand manual page 7 and 8 */
+.ph {
+  position: relative;
+  background: #f0c510;
+  overflow: hidden;
+}
+
+.ph::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(135deg, transparent, transparent 11px, #e3b80e 11px, #e3b80e 12px);
+  pointer-events: none;
+}
+
+.ph.lbl::after {
+  content: attr(data-l);
+  position: absolute;
+  left: 24px;
+  bottom: 20px;
+  font-family: "Arial Narrow", Arial, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #E52E33;
+  opacity: 0.8;
+  z-index: 2;
+}
+
+.ph-red {
+  position: relative;
+  background: #d82025;
+  overflow: hidden;
+}
+
+.ph-red::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(135deg, transparent, transparent 11px, #b91519 11px, #b91519 12px);
+  pointer-events: none;
+}
+
+/* Interactive brand buttons and rows */
+.btn-brand {
+  transition: all .2s cubic-bezier(0.16, 1, 0.3, 1);
+  background: #FFD41D;
+  color: #E52E33;
+  border: 1px solid #E52E33;
+}
+
+.btn-brand:hover {
+  background: #E52E33;
+  color: #FFD41D;
+}
+
+.btn-brand-inverse {
+  transition: all .2s cubic-bezier(0.16, 1, 0.3, 1);
+  background: #E52E33;
+  color: #FFD41D;
+  border: 1px solid #E52E33;
+}
+
+.btn-brand-inverse:hover {
+  background: #FFD41D;
+  color: #E52E33;
+}
+
+.brand-row {
+  transition: padding-left .28s cubic-bezier(0.16, 1, 0.3, 1), background .25s ease;
+}
+
+.brand-row:hover {
+  padding-left: 48px;
+  background: rgba(229, 46, 51, 0.05);
+}
+
+.lk-brand {
+  transition: opacity .2s ease;
+}
+
+.lk-brand:hover {
+  opacity: .5;
+}
+
+/* Image treatments from brand manual: B&W with yellow negative overlay (Page 5 & 8) */
+.brand-image-duotone {
+  filter: grayscale(100%) contrast(140%);
+  mix-blend-mode: multiply;
+  opacity: 0.92;
+}
+
+/* Utilities */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Dot matrix display simulation */
+.matrix-text {
+  font-family: 'Space Mono', monospace;
+  letter-spacing: 0.15em;
+}
+
+/* Justified line text as shown in brand manual page 6 and 9 */
+.text-justified-tight {
+  text-align: justify;
+  text-justify: inter-character;
+  line-height: 1.45;
+}
