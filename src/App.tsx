@@ -27,7 +27,7 @@ import {
 import { 
   Settings, Users, Sparkles, ArrowDown, Wallet, 
   CheckCircle, ShieldCheck, Mail, MapPin, Phone, 
-  User, Lock, QrCode, LogIn, ExternalLink, Youtube, FileCode
+  User, Lock, QrCode, LogIn, ExternalLink, Youtube 
 } from 'lucide-react';
 
 export default function App() {
@@ -271,18 +271,6 @@ export default function App() {
                 <span className="w-2 h-2 rounded-full bg-[#FFD41D] animate-ping" />
               )}
             </button>
-
-            {/* 3. DESCARGAR / ABRIR PROYECTO COMPLETO EN 1 HTML */}
-            <a
-              href="/kamikaze_completo.html"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden lg:flex items-center gap-1.5 border border-[#E52E33] bg-[#f0c510] hover:bg-[#E52E33] hover:text-[#FFD41D] px-2.5 py-1.5 text-[10px] font-mono uppercase font-bold tracking-wider transition-colors shadow-xs"
-              title="Abrir o guardar todo el proyecto en un único archivo HTML autónomo"
-            >
-              <FileCode className="w-3.5 h-3.5" />
-              <span>HTML Único</span>
-            </a>
           </div>
         </header>
 
@@ -399,30 +387,21 @@ export default function App() {
 
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-mono uppercase tracking-widest opacity-80">
             <span>www.kamikaze.xyz</span>
-              <div className="flex items-center gap-4">
-                <a
-                  href="/kamikaze_completo.html"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline hover:opacity-100 cursor-pointer font-bold"
-                >
-                  [ Descargar / Ver HTML Único ]
-                </a>
-                <span>·</span>
-                <button
-                  onClick={() => setIsStudentPortalOpen(true)}
-                  className="underline hover:opacity-100 cursor-pointer"
-                >
-                  [ Portal Alumnxs ]
-                </button>
-                <span>·</span>
-                <button
-                  onClick={() => setIsAdminPanelOpen(true)}
-                  className="underline hover:opacity-100 cursor-pointer"
-                >
-                  [ Acceso Administrador ]
-                </button>
-              </div>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setIsStudentPortalOpen(true)}
+                className="underline hover:opacity-100 cursor-pointer"
+              >
+                [ Portal Alumnxs ]
+              </button>
+              <span>·</span>
+              <button
+                onClick={() => setIsAdminPanelOpen(true)}
+                className="underline hover:opacity-100 cursor-pointer"
+              >
+                [ Acceso Administrador ]
+              </button>
+            </div>
           </div>
         </footer>
 
