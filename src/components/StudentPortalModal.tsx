@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   X, User, Mail, Phone, ShieldCheck, QrCode, 
   Calendar, CheckCircle, Clock, AlertCircle, 
@@ -32,7 +32,19 @@ export const StudentPortalModal: React.FC<StudentPortalModalProps> = ({
   walletConfig,
   onStartEnrollmentForWorkshop,
 }) => {
-  if (!isOpen) return null;
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
 
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [loginEmail, setLoginEmail] = useState('');
@@ -156,9 +168,17 @@ END:VCALENDAR`;
     document.body.removeChild(link);
   };
 
+  if (!isOpen) return null;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs">
-      <div className="bg-[#FFD41D] text-[#E52E33] border-2 border-[#E52E33] w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div 
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs cursor-pointer"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-[#FFD41D] text-[#E52E33] border-2 border-[#E52E33] w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] cursor-default"
+        onClick={(e) => e.stopPropagation()}
+      >
         
         {/* Header */}
         <div className="flex justify-between items-center px-6 py-4 border-b border-[#E52E33] bg-[#f0c510]">

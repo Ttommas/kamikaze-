@@ -75,9 +75,6 @@ export const KamikazeLogo: React.FC<LogoProps> = ({
       <span className={`font-black ${sizeStyles[size]} uppercase leading-none brand-title`}>
         k·a·m·i·k·a·z·e
       </span>
-      <span className="text-[0.65em] font-normal opacity-80 border border-current px-1 py-0.5 ml-1">
-        ⁄∅
-      </span>
     </div>
   );
 };

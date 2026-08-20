@@ -1,10 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ARTISTS_DATA } from '../data/initialData';
 import { Artist } from '../types';
 import { X, Sparkles } from 'lucide-react';
 
-export const ArtistsSection: React.FC = () => {
+interface ArtistsSectionProps {
+  artists?: Artist[];
+}
+
+export const ArtistsSection: React.FC<ArtistsSectionProps> = ({ artists = ARTISTS_DATA }) => {
   const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
+
+  // Close on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && selectedArtist) {
+        setSelectedArtist(null);
+      }
+    };
+    if (selectedArtist) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [selectedArtist]);
+
+  const countStr = artists.length < 10 ? `0${artists.length}` : `${artists.length}`;
 
   return (
     <section id="artistas" className="border-b border-[#E52E33] scroll-mt-16">
@@ -14,16 +35,16 @@ export const ArtistsSection: React.FC = () => {
           Quiénes somos — artistas participantes
         </h2>
         <span className="text-xs tracking-[0.16em] uppercase font-mono">
-          06 integrantes
+          {countStr} integrantes
         </span>
       </div>
 
       {/* Horizontal Scroll Gallery matching HTML & Brand Manual Page 5 */}
       <div className="hide-scrollbar flex items-start gap-8 sm:gap-10 overflow-x-auto px-6 sm:px-12 py-12 border-b border-[#E52E33]/30">
-        {ARTISTS_DATA.map((artist, idx) => {
+        {artists.map((artist, idx) => {
           // Differing margin top offsets to create rhythmic layout from original template
-          const mtClass = idx === 0 ? 'sm:mt-16' : idx === 1 ? 'sm:mt-0' : idx === 2 ? 'sm:mt-24' : idx === 3 ? 'sm:mt-8' : idx === 4 ? 'sm:mt-20' : 'sm:mt-6';
-          const sizeClass = idx === 1 ? 'w-64 h-64 sm:w-72 sm:h-72' : idx === 5 ? 'w-60 h-60 sm:w-68 sm:h-68' : 'w-52 h-52 sm:w-56 sm:h-56';
+          const mtClass = idx % 6 === 0 ? 'sm:mt-16' : idx % 6 === 1 ? 'sm:mt-0' : idx % 6 === 2 ? 'sm:mt-24' : idx % 6 === 3 ? 'sm:mt-8' : idx % 6 === 4 ? 'sm:mt-20' : 'sm:mt-6';
+          const sizeClass = idx % 6 === 1 ? 'w-64 h-64 sm:w-72 sm:h-72' : idx % 6 === 5 ? 'w-60 h-60 sm:w-68 sm:h-68' : 'w-52 h-52 sm:w-56 sm:h-56';
 
           return (
             <figure 
@@ -42,7 +63,7 @@ export const ArtistsSection: React.FC = () => {
                 
                 {/* Brand label */}
                 <span className="absolute bottom-2 left-2 text-[10px] font-mono tracking-widest uppercase px-1.5 py-0.5 bg-[#FFD41D] text-[#E52E33] border border-[#E52E33] opacity-90">
-                  {artist.portraitLabel}
+                  {artist.portraitLabel || `[ retrato · 0${idx + 1} ]`}
                 </span>
               </div>
 
@@ -62,8 +83,14 @@ export const ArtistsSection: React.FC = () => {
 
       {/* Artist Bio Modal */}
       {selectedArtist && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-xs">
-          <div className="bg-[#FFD41D] text-[#E52E33] border-2 border-[#E52E33] w-full max-w-lg p-6 sm:p-8 shadow-2xl space-y-4">
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-xs cursor-pointer"
+          onClick={() => setSelectedArtist(null)}
+        >
+          <div 
+            className="bg-[#FFD41D] text-[#E52E33] border-2 border-[#E52E33] w-full max-w-lg p-6 sm:p-8 shadow-2xl space-y-4 cursor-default"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex justify-between items-start border-b border-[#E52E33] pb-3">
               <div>
                 <span className="text-xs font-mono uppercase tracking-widest opacity-80 block">
@@ -73,7 +100,11 @@ export const ArtistsSection: React.FC = () => {
                   {selectedArtist.name}
                 </h3>
               </div>
-              <button onClick={() => setSelectedArtist(null)} className="p-1 border border-[#E52E33]">
+              <button 
+                onClick={() => setSelectedArtist(null)} 
+                className="p-1 border border-[#E52E33] hover:bg-[#E52E33] hover:text-[#FFD41D] transition-colors"
+                title="Cerrar (Esc)"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -99,7 +130,7 @@ export const ArtistsSection: React.FC = () => {
                 onClick={() => setSelectedArtist(null)}
                 className="btn-brand-inverse px-5 py-2 font-mono text-xs uppercase font-bold cursor-pointer"
               >
-                Cerrar
+                Cerrar [ESC]
               </button>
             </div>
           </div>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { X, Calendar, Clock, MapPin, CheckCircle, User, Award, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
 import { Workshop, WalletConfig } from '../types';
 
@@ -16,14 +16,31 @@ export const WorkshopDetailModal: React.FC<WorkshopDetailModalProps> = ({
   onClose,
   onStartEnrollment,
 }) => {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen || !workshop) return null;
 
   const isSoldOut = workshop.availableSpots <= 0;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-xs overflow-y-auto">
+    <div 
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-xs overflow-y-auto cursor-pointer"
+      onClick={onClose}
+    >
       <div 
-        className="relative w-full max-w-3xl bg-[#FFD41D] text-[#E52E33] border-2 border-[#E52E33] shadow-2xl my-8 overflow-hidden"
+        className="relative w-full max-w-3xl bg-[#FFD41D] text-[#E52E33] border-2 border-[#E52E33] shadow-2xl my-8 overflow-hidden cursor-default"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header bar */}

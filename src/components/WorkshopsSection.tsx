@@ -62,7 +62,7 @@ export const WorkshopsSection: React.FC<WorkshopsSectionProps> = ({
             </span>
           </div>
           <p className="text-xs opacity-80 mt-1 font-mono">
-            Formación experimental, procesos compartidos & vinculación con billetera virtual
+            Formación experimental & procesos compartidos
           </p>
         </div>
 

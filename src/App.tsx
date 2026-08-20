@@ -18,11 +18,12 @@ import {
   INITIAL_WALLET_CONFIG,
   INITIAL_BITACORA_VIDEO,
   BITACORA_DATA,
-  EVENTS_DATA
+  EVENTS_DATA,
+  ARTISTS_DATA
 } from './data/initialData';
 import { 
   Workshop, Enrollment, WalletConfig, PaymentStatus, 
-  StudentUser, BitacoraVideoConfig, BitacoraEntry, EventItem 
+  StudentUser, BitacoraVideoConfig, BitacoraEntry, EventItem, Artist 
 } from './types';
 import { 
   Settings, Users, Sparkles, ArrowDown, Wallet, 
@@ -85,6 +86,15 @@ export default function App() {
     return EVENTS_DATA;
   });
 
+  // Persistent State for Collective Artists & Members
+  const [artists, setArtists] = useState<Artist[]>(() => {
+    const saved = localStorage.getItem('kmkz_artists_v1');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) {}
+    }
+    return ARTISTS_DATA;
+  });
+
   // Logged in Student / Participant
   const [currentUser, setCurrentUser] = useState<StudentUser | null>(() => {
     const saved = localStorage.getItem('kmkz_student_user_v1');
@@ -125,6 +135,10 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('kmkz_events_v1', JSON.stringify(events));
   }, [events]);
+
+  useEffect(() => {
+    localStorage.setItem('kmkz_artists_v1', JSON.stringify(artists));
+  }, [artists]);
 
   useEffect(() => {
     if (currentUser) {
@@ -263,10 +277,10 @@ export default function App() {
             <button
               onClick={() => setIsAdminPanelOpen(true)}
               className="btn-brand-inverse px-3 py-1.5 text-[11px] font-mono uppercase tracking-wider flex items-center gap-1.5 font-bold cursor-pointer shadow-xs"
-              title="Acceso Administrador (colectivokamizaze / kamikaze2026)"
+              title="Panel de Administración y Gestión del Colectivo"
             >
               <Lock className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Admin</span>
+              <span>Admin</span>
               {enrollments.filter(e => e.paymentStatus === 'pendiente_verificacion').length > 0 && (
                 <span className="w-2 h-2 rounded-full bg-[#FFD41D] animate-ping" />
               )}
@@ -346,7 +360,7 @@ export default function App() {
         />
 
         {/* ================= ARTISTS SECTION ================= */}
-        <ArtistsSection />
+        <ArtistsSection artists={artists} />
 
         {/* ================= SUPPORT / WALLET SOSTÉN ================= */}
         <SupportSection
@@ -454,6 +468,7 @@ export default function App() {
         bitacoraVideo={bitacoraVideo}
         bitacoraEntries={bitacoraEntries}
         events={events}
+        artists={artists}
         isOpen={isAdminPanelOpen}
         onClose={() => setIsAdminPanelOpen(false)}
         onUpdateEnrollmentStatus={handleUpdateEnrollmentStatus}
@@ -465,6 +480,7 @@ export default function App() {
         onSaveBitacoraVideo={(v) => setBitacoraVideo(v)}
         onSaveBitacoraEntries={(b) => setBitacoraEntries(b)}
         onSaveEvents={(e) => setEvents(e)}
+        onSaveArtists={(a) => setArtists(a)}
       />
 
       {/* 5. Propose Workshop / Artwork Modal */}
@@ -472,6 +488,16 @@ export default function App() {
         isOpen={isProposalModalOpen}
         onClose={() => setIsProposalModalOpen(false)}
       />
+
+      {/* Floating Quick Admin Access Button */}
+      <button
+        onClick={() => setIsAdminPanelOpen(true)}
+        className="fixed bottom-4 right-4 z-40 bg-[#E52E33] text-[#FFD41D] border-2 border-black/30 hover:bg-[#c92429] px-3.5 py-2.5 shadow-2xl font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-2 cursor-pointer transition-transform hover:scale-105 active:scale-95"
+        title="Abrir Panel de Administración KAMIKAZE"
+      >
+        <Lock className="w-4 h-4" />
+        <span>Panel Admin</span>
+      </button>
     </div>
   );
 }

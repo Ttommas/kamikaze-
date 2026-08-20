@@ -46,24 +46,24 @@ export const WorkAxesSection: React.FC = () => {
           return (
             <div 
               key={axis.num} 
-              className="p-8 sm:p-12 hover:bg-[#f0c510]/50 transition-colors flex flex-col justify-between group"
+              className="p-6 sm:p-8 lg:p-12 hover:bg-[#f0c510]/50 transition-colors flex flex-col justify-between group min-w-0 overflow-hidden"
             >
-              <div>
+              <div className="min-w-0">
                 <div className="flex items-center justify-between text-xs font-mono tracking-[0.14em] opacity-80 mb-4">
                   <span>{axis.num} / {axis.tag}</span>
-                  <Icon className="w-4 h-4 text-[#E52E33] opacity-60 group-hover:opacity-100 transition-opacity" />
+                  <Icon className="w-4 h-4 text-[#E52E33] opacity-60 group-hover:opacity-100 transition-opacity shrink-0" />
                 </div>
 
-                <h3 className="brand-title text-2xl sm:text-3xl font-normal leading-tight mb-4 group-hover:underline">
+                <h3 className="brand-title text-xl sm:text-2xl lg:text-2xl xl:text-3xl font-normal leading-tight mb-4 group-hover:underline break-words">
                   {axis.title}
                 </h3>
 
-                <p className="text-sm leading-relaxed opacity-90 mb-4">
+                <p className="text-sm leading-relaxed opacity-90 mb-4 break-words">
                   {axis.desc}
                 </p>
               </div>
 
-              <div className="pt-4 border-t border-[#E52E33]/30 text-xs font-mono opacity-75">
+              <div className="pt-4 border-t border-[#E52E33]/30 text-xs font-mono opacity-75 break-words">
                 {axis.detail}
               </div>
             </div>

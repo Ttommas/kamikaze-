@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Send, Sparkles, Check } from 'lucide-react';
 
 interface ProposeWorkshopModalProps {
@@ -10,7 +10,19 @@ export const ProposeWorkshopModal: React.FC<ProposeWorkshopModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  if (!isOpen) return null;
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -42,9 +54,17 @@ export const ProposeWorkshopModal: React.FC<ProposeWorkshopModalProps> = ({
     }, 2500);
   };
 
+  if (!isOpen) return null;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-xs">
-      <div className="bg-[#FFD41D] text-[#E52E33] border-2 border-[#E52E33] w-full max-w-xl p-6 sm:p-8 shadow-2xl space-y-4 max-h-[88vh] overflow-y-auto">
+    <div 
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/65 backdrop-blur-xs cursor-pointer"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-[#FFD41D] text-[#E52E33] border-2 border-[#E52E33] w-full max-w-xl p-6 sm:p-8 shadow-2xl space-y-4 max-h-[88vh] overflow-y-auto cursor-default"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex justify-between items-center border-b border-[#E52E33] pb-3">
           <span className="font-mono text-xs uppercase tracking-widest font-bold">
             Convocatoria Abierta — KAMIKAZE

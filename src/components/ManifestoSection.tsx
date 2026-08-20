@@ -28,9 +28,6 @@ export const ManifestoSection: React.FC = () => {
               <span>{isExpanded ? 'Ocultar manifiesto extendido ↑' : 'Leer el manifiesto extendido completo →'}</span>
               {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
             </button>
-            <span className="text-[11px] font-mono opacity-70">
-              [ Tipografía BD Terminal VF & Textos justificados ]
-            </span>
           </div>
         </div>
       </div>
@@ -85,7 +82,7 @@ export const ManifestoSection: React.FC = () => {
 
             <div className="pt-4 border-t border-[#E52E33]/40 flex justify-between items-center text-xs font-mono opacity-80">
               <span>humane creatives — 2026</span>
-              <span className="font-bold">KAMIKAZE⁄∅</span>
+              <span className="font-bold">KAMIKAZE</span>
             </div>
           </div>
         </div>

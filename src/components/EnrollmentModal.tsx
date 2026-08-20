@@ -26,8 +26,6 @@ export const EnrollmentModal: React.FC<EnrollmentModalProps> = ({
   currentUser,
   onOpenStudentLogin,
 }) => {
-  if (!isOpen || !workshop) return null;
-
   const [step, setStep] = useState<1 | 2 | 3>(1);
   
   // Step 1 Form Data
@@ -39,6 +37,21 @@ export const EnrollmentModal: React.FC<EnrollmentModalProps> = ({
     isMember: currentUser?.isMember || false,
     comments: '',
   });
+
+  // Close on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
 
   // Sync if currentUser logs in
   useEffect(() => {
@@ -66,7 +79,7 @@ export const EnrollmentModal: React.FC<EnrollmentModalProps> = ({
   const [completedEnrollment, setCompletedEnrollment] = useState<Enrollment | null>(null);
 
   // Price calculations
-  const currentBasePrice = formData.isMember ? workshop.memberPrice : workshop.regularPrice;
+  const currentBasePrice = formData.isMember ? (workshop?.memberPrice || 0) : (workshop?.regularPrice || 0);
   const finalAmountToPay = paymentOption === 'total' ? currentBasePrice : Math.round(currentBasePrice / 2);
 
   const handleCopy = (text: string, fieldName: string) => {
@@ -168,10 +181,15 @@ END:VCALENDAR`;
     window.open(url, '_blank');
   };
 
+  if (!isOpen || !workshop) return null;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/65 backdrop-blur-xs overflow-y-auto">
+    <div 
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/65 backdrop-blur-xs overflow-y-auto cursor-pointer"
+      onClick={onClose}
+    >
       <div 
-        className="relative w-full max-w-2xl bg-[#FFD41D] text-[#E52E33] border-2 border-[#E52E33] shadow-2xl my-8 overflow-hidden"
+        className="relative w-full max-w-2xl bg-[#FFD41D] text-[#E52E33] border-2 border-[#E52E33] shadow-2xl my-8 overflow-hidden cursor-default"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top bar with step indicators */}
