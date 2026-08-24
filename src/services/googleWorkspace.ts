@@ -24,20 +24,26 @@ const firebaseConfig = {
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 export const auth = getAuth(app);
 
-// Scopes required for Gmail sending and User Profile
+// Standard non-sensitive scopes for user authentication & profile
 export const SCOPES = [
-  'https://www.googleapis.com/auth/gmail.send',
   'https://www.googleapis.com/auth/userinfo.email',
   'https://www.googleapis.com/auth/userinfo.profile',
 ];
 
 const provider = new GoogleAuthProvider();
-SCOPES.forEach((scope) => provider.addScope(scope));
+provider.addScope('https://www.googleapis.com/auth/userinfo.email');
+provider.addScope('https://www.googleapis.com/auth/userinfo.profile');
+provider.setCustomParameters({
+  prompt: 'select_account',
+});
 
-// Admin provider (strictly authentication, without requesting Gmail sending scope)
+// Admin provider (strictly authentication)
 const adminProvider = new GoogleAuthProvider();
 adminProvider.addScope('https://www.googleapis.com/auth/userinfo.email');
 adminProvider.addScope('https://www.googleapis.com/auth/userinfo.profile');
+adminProvider.setCustomParameters({
+  prompt: 'select_account',
+});
 
 // In-memory token cache (strictly in-memory, not in storage)
 let cachedAccessToken: string | null = null;
@@ -110,12 +116,7 @@ export const signInWithGoogle = async (): Promise<{
   try {
     const result = await signInWithPopup(auth, provider);
     const credential = GoogleAuthProvider.credentialFromResult(result);
-    const accessToken = credential?.accessToken;
-
-    if (!accessToken) {
-      throw new Error('No se recibió el Access Token de Google OAuth.');
-    }
-
+    const accessToken = credential?.accessToken || '';
     cachedAccessToken = accessToken;
     const studentUser = mapFirebaseUserToStudent(result.user);
     cachedUser = studentUser;
