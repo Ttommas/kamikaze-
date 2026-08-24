@@ -28,10 +28,29 @@ import {
 import { 
   Settings, Users, Sparkles, ArrowDown, Wallet, 
   CheckCircle, ShieldCheck, Mail, MapPin, Phone, 
-  User, Lock, QrCode, LogIn, ExternalLink, Youtube 
+  User, Lock, QrCode, LogIn, ExternalLink, Youtube, Cloud
 } from 'lucide-react';
 import { auth, mapFirebaseUserToStudent, logoutGoogleAuth } from './services/googleWorkspace';
 import { onAuthStateChanged } from 'firebase/auth';
+import {
+  subscribeWorkshops,
+  subscribeEnrollments,
+  subscribeWalletConfig,
+  subscribeBitacoraVideo,
+  subscribeBitacoraEntries,
+  subscribeEvents,
+  subscribeArtists,
+  saveWorkshopToFirestore,
+  deleteWorkshopFromFirestore,
+  saveEnrollmentToFirestore,
+  updateEnrollmentStatusInFirestore,
+  deleteEnrollmentFromFirestore,
+  saveWalletConfigToFirestore,
+  saveBitacoraVideoToFirestore,
+  saveBitacoraEntriesToFirestore,
+  saveEventsToFirestore,
+  saveArtistsToFirestore,
+} from './services/firestoreService';
 
 export default function App() {
   // Persistent State for Workshops
@@ -113,7 +132,7 @@ export default function App() {
   const [isStudentPortalOpen, setIsStudentPortalOpen] = useState(false);
   const [isProposalModalOpen, setIsProposalModalOpen] = useState(false);
 
-  // Sync state changes with localStorage
+  // Sync state changes with localStorage as offline cache
   useEffect(() => {
     localStorage.setItem('kmkz_workshops_v1', JSON.stringify(workshops));
   }, [workshops]);
@@ -150,6 +169,41 @@ export default function App() {
     }
   }, [currentUser]);
 
+  // Real-time Cloud Subscriptions from Firestore
+  useEffect(() => {
+    const unsubWorkshops = subscribeWorkshops((data) => {
+      if (data && data.length > 0) setWorkshops(data);
+    });
+    const unsubEnrollments = subscribeEnrollments((data) => {
+      if (data) setEnrollments(data);
+    });
+    const unsubWallet = subscribeWalletConfig((data) => {
+      if (data) setWalletConfig(data);
+    });
+    const unsubBitacoraVideo = subscribeBitacoraVideo((data) => {
+      if (data) setBitacoraVideo(data);
+    });
+    const unsubBitacoraEntries = subscribeBitacoraEntries((data) => {
+      if (data && data.length > 0) setBitacoraEntries(data);
+    });
+    const unsubEvents = subscribeEvents((data) => {
+      if (data && data.length > 0) setEvents(data);
+    });
+    const unsubArtists = subscribeArtists((data) => {
+      if (data && data.length > 0) setArtists(data);
+    });
+
+    return () => {
+      unsubWorkshops();
+      unsubEnrollments();
+      unsubWallet();
+      unsubBitacoraVideo();
+      unsubBitacoraEntries();
+      unsubEvents();
+      unsubArtists();
+    };
+  }, []);
+
   // Automatically listen to Firebase Auth state
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (fbUser) => {
@@ -175,6 +229,7 @@ export default function App() {
   // Handle new enrollment and automatically decrease available spots
   const handleEnrollmentComplete = (newEnrollment: Enrollment) => {
     setEnrollments((prev) => [newEnrollment, ...prev]);
+    saveEnrollmentToFirestore(newEnrollment).catch((e) => console.error('Error saving enrollment online:', e));
 
     // If user is not logged in, auto-create their student profile with their entered info so they can access their portal
     if (!currentUser) {
@@ -192,55 +247,83 @@ export default function App() {
     }
 
     // Decrease workshop available spots automatically
-    setWorkshops((prev) =>
-      prev.map((ws) => {
-        if (ws.id === newEnrollment.workshopId) {
-          const newAvailable = Math.max(0, ws.availableSpots - 1);
-          return { ...ws, availableSpots: newAvailable };
-        }
-        return ws;
-      })
-    );
+    const targetWorkshop = workshops.find((w) => w.id === newEnrollment.workshopId);
+    if (targetWorkshop) {
+      const updatedWorkshop = {
+        ...targetWorkshop,
+        availableSpots: Math.max(0, targetWorkshop.availableSpots - 1),
+      };
+      setWorkshops((prev) =>
+        prev.map((ws) => (ws.id === updatedWorkshop.id ? updatedWorkshop : ws))
+      );
+      saveWorkshopToFirestore(updatedWorkshop).catch((e) => console.error('Error syncing workshop spots online:', e));
+    }
   };
 
-  // Admin Actions
+  // Admin Actions with Online Cloud Firestore Persistence
   const handleUpdateEnrollmentStatus = (enrollmentId: string, newStatus: PaymentStatus) => {
     setEnrollments((prev) =>
       prev.map((enr) => (enr.id === enrollmentId ? { ...enr, paymentStatus: newStatus } : enr))
     );
+    updateEnrollmentStatusInFirestore(enrollmentId, newStatus).catch((e) => console.error('Error updating enrollment online:', e));
   };
 
   const handleDeleteEnrollment = (enrollmentId: string) => {
     const toDelete = enrollments.find((e) => e.id === enrollmentId);
     setEnrollments((prev) => prev.filter((e) => e.id !== enrollmentId));
+    deleteEnrollmentFromFirestore(enrollmentId).catch((e) => console.error('Error deleting enrollment online:', e));
 
     // Release spot back
     if (toDelete) {
-      setWorkshops((prev) =>
-        prev.map((ws) => {
-          if (ws.id === toDelete.workshopId) {
-            return { ...ws, availableSpots: Math.min(ws.totalSpots, ws.availableSpots + 1) };
-          }
-          return ws;
-        })
-      );
+      const ws = workshops.find((w) => w.id === toDelete.workshopId);
+      if (ws) {
+        const updatedWs = { ...ws, availableSpots: Math.min(ws.totalSpots, ws.availableSpots + 1) };
+        setWorkshops((prev) =>
+          prev.map((item) => (item.id === updatedWs.id ? updatedWs : item))
+        );
+        saveWorkshopToFirestore(updatedWs).catch((e) => console.error('Error restoring spot online:', e));
+      }
     }
   };
 
   const handleSaveWalletConfig = (newConfig: WalletConfig) => {
     setWalletConfig(newConfig);
+    saveWalletConfigToFirestore(newConfig).catch((e) => console.error('Error saving wallet online:', e));
   };
 
   const handleUpdateWorkshop = (updatedWorkshop: Workshop) => {
     setWorkshops((prev) => prev.map((ws) => (ws.id === updatedWorkshop.id ? updatedWorkshop : ws)));
+    saveWorkshopToFirestore(updatedWorkshop).catch((e) => console.error('Error updating workshop online:', e));
   };
 
   const handleAddWorkshop = (newWorkshop: Workshop) => {
     setWorkshops((prev) => [newWorkshop, ...prev]);
+    saveWorkshopToFirestore(newWorkshop).catch((e) => console.error('Error creating workshop online:', e));
   };
 
   const handleDeleteWorkshop = (workshopId: string) => {
     setWorkshops((prev) => prev.filter((w) => w.id !== workshopId));
+    deleteWorkshopFromFirestore(workshopId).catch((e) => console.error('Error deleting workshop online:', e));
+  };
+
+  const handleSaveBitacoraVideo = (newVideo: BitacoraVideoConfig) => {
+    setBitacoraVideo(newVideo);
+    saveBitacoraVideoToFirestore(newVideo).catch((e) => console.error('Error saving video online:', e));
+  };
+
+  const handleSaveBitacoraEntries = (entries: BitacoraEntry[]) => {
+    setBitacoraEntries(entries);
+    saveBitacoraEntriesToFirestore(entries).catch((e) => console.error('Error saving bitacora entries online:', e));
+  };
+
+  const handleSaveEvents = (newEvents: EventItem[]) => {
+    setEvents(newEvents);
+    saveEventsToFirestore(newEvents).catch((e) => console.error('Error saving events online:', e));
+  };
+
+  const handleSaveArtists = (newArtists: Artist[]) => {
+    setArtists(newArtists);
+    saveArtistsToFirestore(newArtists).catch((e) => console.error('Error saving artists online:', e));
   };
 
   // User Enrollments count
@@ -510,10 +593,10 @@ export default function App() {
         onUpdateWorkshop={handleUpdateWorkshop}
         onAddWorkshop={handleAddWorkshop}
         onDeleteWorkshop={handleDeleteWorkshop}
-        onSaveBitacoraVideo={(v) => setBitacoraVideo(v)}
-        onSaveBitacoraEntries={(b) => setBitacoraEntries(b)}
-        onSaveEvents={(e) => setEvents(e)}
-        onSaveArtists={(a) => setArtists(a)}
+        onSaveBitacoraVideo={handleSaveBitacoraVideo}
+        onSaveBitacoraEntries={handleSaveBitacoraEntries}
+        onSaveEvents={handleSaveEvents}
+        onSaveArtists={handleSaveArtists}
       />
 
       {/* 5. Propose Workshop / Artwork Modal */}

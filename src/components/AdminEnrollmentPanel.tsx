@@ -400,16 +400,20 @@ export const AdminEnrollmentPanel: React.FC<AdminEnrollmentPanelProps> = ({
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <span className="font-mono text-sm uppercase tracking-widest font-black">
                   Panel de Gestión & Administración KAMIKAZE
                 </span>
                 <span className="text-[10px] font-mono px-1.5 py-0.5 bg-[#E52E33] text-[#FFD41D] font-bold uppercase">
                   Acceso Total
                 </span>
+                <span className="text-[10px] font-mono px-2 py-0.5 bg-emerald-800 text-emerald-100 font-bold uppercase flex items-center gap-1 border border-emerald-600">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                  Nube Online (Firestore)
+                </span>
               </div>
               <span className="text-xs font-mono opacity-80 block">
-                Control de nóminas, talleres, videos YouTube de bitácora y billetera virtual
+                Sincronización en tiempo real de nóminas, talleres, bitácora, eventos y billetera virtual
               </span>
             </div>
           </div>

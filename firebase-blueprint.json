@@ -1,0 +1,166 @@
+{
+  "entities": {
+    "Workshop": {
+      "title": "Workshop",
+      "description": "Workshop offered by Kamikaze Collective",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "code": { "type": "string" },
+        "title": { "type": "string" },
+        "subtitle": { "type": "string" },
+        "season": { "type": "string" },
+        "discipline": { "type": "string" },
+        "modality": { "type": "string" },
+        "schedule": { "type": "string" },
+        "dates": { "type": "string" },
+        "duration": { "type": "string" },
+        "totalSpots": { "type": "number" },
+        "availableSpots": { "type": "number" },
+        "regularPrice": { "type": "number" },
+        "memberPrice": { "type": "number" },
+        "teacherName": { "type": "string" },
+        "teacherRole": { "type": "string" },
+        "teacherBio": { "type": "string" },
+        "teacherAvatar": { "type": "string" },
+        "description": { "type": "string" },
+        "syllabus": { "type": "array" },
+        "materialsIncluded": { "type": "array" },
+        "requirements": { "type": "string" },
+        "location": { "type": "string" },
+        "image": { "type": "string" },
+        "featured": { "type": "boolean" },
+        "active": { "type": "boolean" }
+      },
+      "required": ["id", "title", "discipline", "active"]
+    },
+    "Enrollment": {
+      "title": "Enrollment",
+      "description": "Student enrollment in a workshop",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "enrollmentCode": { "type": "string" },
+        "workshopId": { "type": "string" },
+        "workshopTitle": { "type": "string" },
+        "studentName": { "type": "string" },
+        "studentEmail": { "type": "string" },
+        "studentPhone": { "type": "string" },
+        "studentDoc": { "type": "string" },
+        "isMember": { "type": "boolean" },
+        "comments": { "type": "string" },
+        "paymentMethod": { "type": "string" },
+        "paymentOption": { "type": "string" },
+        "paymentAmount": { "type": "number" },
+        "paymentStatus": { "type": "string" },
+        "paymentProofRef": { "type": "string" },
+        "proofFileName": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "notesAdmin": { "type": "string" }
+      },
+      "required": ["id", "enrollmentCode", "workshopId", "studentName", "studentEmail", "paymentStatus"]
+    },
+    "WalletConfig": {
+      "title": "WalletConfig",
+      "description": "Payment and contact configuration",
+      "type": "object",
+      "properties": {
+        "mpAlias": { "type": "string" },
+        "mpCvu": { "type": "string" },
+        "mpCbu": { "type": "string" },
+        "mpTitular": { "type": "string" },
+        "mpAccountName": { "type": "string" },
+        "mpPaymentLink": { "type": "string" },
+        "whatsappNumber": { "type": "string" },
+        "contactEmail": { "type": "string" },
+        "atelierAddress": { "type": "string" }
+      }
+    },
+    "BitacoraVideoConfig": {
+      "title": "BitacoraVideoConfig",
+      "description": "Video bitacora feature config",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "monthYear": { "type": "string" },
+        "description": { "type": "string" },
+        "youtubeUrl": { "type": "string" },
+        "embedId": { "type": "string" },
+        "durationText": { "type": "string" },
+        "coverImage": { "type": "string" }
+      }
+    },
+    "BitacoraEntry": {
+      "title": "BitacoraEntry",
+      "description": "Logbook article or note",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "week": { "type": "string" },
+        "dates": { "type": "string" },
+        "title": { "type": "string" },
+        "excerpt": { "type": "string" },
+        "fullText": { "type": "string" },
+        "author": { "type": "string" },
+        "tags": { "type": "array" }
+      },
+      "required": ["id", "title"]
+    },
+    "EventItem": {
+      "title": "EventItem",
+      "description": "Public event or exhibition",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "date": { "type": "string" },
+        "fullDate": { "type": "string" },
+        "time": { "type": "string" },
+        "location": { "type": "string" },
+        "description": { "type": "string" }
+      },
+      "required": ["id", "title"]
+    },
+    "Artist": {
+      "title": "Artist",
+      "description": "Resident artist or collective member",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "discipline": { "type": "string" },
+        "bio": { "type": "string" },
+        "portraitLabel": { "type": "string" },
+        "avatarUrl": { "type": "string" },
+        "statement": { "type": "string" }
+      },
+      "required": ["id", "name"]
+    }
+  },
+  "firestore": {
+    "/workshops/{workshopId}": {
+      "schema": "Workshop",
+      "description": "List of active and archived workshops"
+    },
+    "/enrollments/{enrollmentId}": {
+      "schema": "Enrollment",
+      "description": "Participant registrations and payment receipts"
+    },
+    "/config/{configId}": {
+      "schema": "WalletConfig",
+      "description": "Application settings such as wallet and bitacora video"
+    },
+    "/bitacora_entries/{entryId}": {
+      "schema": "BitacoraEntry",
+      "description": "Bitacora articles"
+    },
+    "/events/{eventId}": {
+      "schema": "EventItem",
+      "description": "Events and open days"
+    },
+    "/artists/{artistId}": {
+      "schema": "Artist",
+      "description": "Artists of the collective"
+    }
+  }
+}

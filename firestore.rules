@@ -1,0 +1,59 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper checks
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isWhitelistedAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'tllaneza1@gmail.com' ||
+        request.auth.token.email == 'colectivokmkz@gmail.com'
+      );
+    }
+
+    // Workshops: anyone can read active workshop catalog; authenticated users or admins can write
+    match /workshops/{workshopId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Enrollments: anyone can create enrollment; admins and students can read/update
+    match /enrollments/{enrollmentId} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if true;
+    }
+
+    // Config (wallet, bitacora video): anyone can read; admins can write
+    match /config/{configId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Bitacora entries: anyone can read; admins can write
+    match /bitacora_entries/{entryId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Events: anyone can read; admins can write
+    match /events/{eventId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Artists: anyone can read; admins can write
+    match /artists/{artistId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Fallback catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
