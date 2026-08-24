@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { X, Check, Mail, Sparkles, Shield, User, ArrowRight, AlertCircle } from 'lucide-react';
+import { X, Shield, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
 import { StudentUser } from '../types';
-import { signInWithGoogle, getCachedAccessToken } from '../services/googleWorkspace';
-import { createStudentUserFromGoogle, GoogleUserProfile } from '../utils/googleAuth';
+import { signInWithGoogle } from '../services/googleWorkspace';
 
 interface GoogleSignInModalProps {
   isOpen: boolean;
@@ -12,29 +11,12 @@ interface GoogleSignInModalProps {
   contextText?: string;
 }
 
-const RECENT_GMAIL_ACCOUNTS: Array<{ name: string; email: string; avatar: string }> = [
-  {
-    name: 'Colectivo KAMIKAZE',
-    email: 'Colectivokmkz@gmail.com',
-    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200&auto=format&fit=crop',
-  },
-  {
-    name: 'Lucía Benítez',
-    email: 'lucia.benitez.arte@gmail.com',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop',
-  },
-];
-
 export const GoogleSignInModal: React.FC<GoogleSignInModalProps> = ({
   isOpen,
   onClose,
   onSuccess,
-  defaultEmail = '',
   contextText = 'para inscribirte a talleres y gestionar tus pases digitales',
 }) => {
-  const [customEmail, setCustomEmail] = useState(defaultEmail);
-  const [customName, setCustomName] = useState('');
-  const [isUsingAnotherAccount, setIsUsingAnotherAccount] = useState(false);
   const [isAuthorizing, setIsAuthorizing] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
@@ -56,52 +38,12 @@ export const GoogleSignInModal: React.FC<GoogleSignInModalProps> = ({
         setAuthError('La ventana de Google se cerró antes de completar la autorización.');
       } else if (err.code === 'auth/popup-blocked') {
         setAuthError('El navegador bloqueó la ventana emergente. Permití ventanas emergentes para este sitio.');
+      } else if (err.code === 'auth/cancelled-popup-request') {
+        setAuthError('Solicitud de ventana emergente cancelada.');
       } else {
         setAuthError(err.message || 'No se pudo completar el inicio de sesión con Google.');
       }
     }
-  };
-
-  const handleSelectSimulatedAccount = (account: { name: string; email: string; avatar?: string }) => {
-    setIsAuthorizing(true);
-    setAuthError(null);
-
-    setTimeout(() => {
-      const profile: GoogleUserProfile = {
-        name: account.name,
-        email: account.email,
-        picture: account.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(account.name)}`,
-        sub: `google-${Math.floor(100000000 + Math.random() * 900000000)}`,
-        email_verified: true,
-      };
-
-      const studentUser = createStudentUserFromGoogle(profile);
-      setIsAuthorizing(false);
-      onSuccess(studentUser);
-      onClose();
-    }, 400);
-  };
-
-  const handleCustomSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!customEmail.trim()) return;
-
-    let email = customEmail.trim().toLowerCase();
-    if (!email.includes('@')) {
-      email = `${email}@gmail.com`;
-    }
-
-    let name = customName.trim();
-    if (!name) {
-      const local = email.split('@')[0].replace(/[._-]/g, ' ');
-      name = local.charAt(0).toUpperCase() + local.slice(1);
-    }
-
-    handleSelectSimulatedAccount({
-      name,
-      email,
-      avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`,
-    });
   };
 
   return (
@@ -137,11 +79,11 @@ export const GoogleSignInModal: React.FC<GoogleSignInModalProps> = ({
               </svg>
             </div>
             <div>
-              <h3 className="font-sans font-medium text-lg text-neutral-900 leading-tight">
+              <h3 className="font-sans font-semibold text-lg text-neutral-900 leading-tight">
                 Acceder con Google
               </h3>
               <p className="text-xs text-neutral-500 font-sans mt-0.5">
-                para continuar a <strong className="text-neutral-800">KAMIKAZE</strong>
+                para continuar en <strong className="text-neutral-800">KAMIKAZE</strong>
               </p>
             </div>
           </div>
@@ -157,8 +99,8 @@ export const GoogleSignInModal: React.FC<GoogleSignInModalProps> = ({
 
         {/* Content */}
         <div className="p-6 space-y-4 font-sans">
-          <p className="text-xs text-neutral-600">
-            Conectá tu cuenta de Google / Gmail {contextText}. Los correos y pases se sincronizarán directamente con la API oficial.
+          <p className="text-xs text-neutral-600 leading-relaxed">
+            Iniciá sesión con tu cuenta de Gmail {contextText}. Tus inscripciones, pases de ingreso y notificaciones se sincronizarán directamente con tu cuenta de Google.
           </p>
 
           {authError && (
@@ -170,23 +112,23 @@ export const GoogleSignInModal: React.FC<GoogleSignInModalProps> = ({
 
           {isAuthorizing ? (
             <div className="py-8 flex flex-col items-center justify-center space-y-3 text-center">
-              <div className="w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin" />
+              <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
               <p className="text-sm font-medium text-neutral-700">
                 Conectando con Google Identity Services...
               </p>
               <p className="text-xs text-neutral-400">
-                Autorizando permisos de Gmail y perfil seguro
+                Validando autenticación con Firebase
               </p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3 pt-2">
               {/* PRIMARY OFFICIAL GOOGLE AUTH BUTTON */}
               <button
                 type="button"
                 onClick={handleRealGoogleOAuth}
                 className="w-full py-3 px-4 bg-white hover:bg-neutral-50 text-neutral-800 border-2 border-blue-600 hover:border-blue-700 rounded-lg shadow-sm hover:shadow font-medium text-sm flex items-center justify-center gap-3 transition-all cursor-pointer"
               >
-                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
                   <path
                     fill="#4285F4"
                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -204,123 +146,22 @@ export const GoogleSignInModal: React.FC<GoogleSignInModalProps> = ({
                     d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
                   />
                 </svg>
-                <span className="font-semibold text-neutral-900">Iniciar sesión con Google (Real OAuth)</span>
+                <span className="font-semibold text-neutral-900">Iniciar sesión con Google</span>
+                <ArrowRight className="w-4 h-4 text-blue-600 ml-auto" />
               </button>
-
-              <div className="flex items-center gap-3 my-2">
-                <div className="h-px bg-neutral-200 flex-1" />
-                <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider">
-                  O vincular cuenta rápida
-                </span>
-                <div className="h-px bg-neutral-200 flex-1" />
-              </div>
-
-              {!isUsingAnotherAccount ? (
-                <div className="space-y-2">
-                  <div className="divide-y divide-neutral-100 border border-neutral-200 rounded-lg overflow-hidden">
-                    {RECENT_GMAIL_ACCOUNTS.map((acc) => (
-                      <button
-                        key={acc.email}
-                        type="button"
-                        onClick={() => handleSelectSimulatedAccount(acc)}
-                        className="w-full p-3 flex items-center justify-between gap-3 text-left hover:bg-neutral-50 transition-colors group cursor-pointer"
-                      >
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <img
-                            src={acc.avatar}
-                            alt={acc.name}
-                            className="w-8 h-8 rounded-full object-cover border border-neutral-200 shrink-0"
-                          />
-                          <div className="min-w-0">
-                            <div className="text-xs font-semibold text-neutral-900 group-hover:text-blue-600 truncate">
-                              {acc.name}
-                            </div>
-                            <div className="text-[11px] text-neutral-500 font-mono truncate">
-                              {acc.email}
-                            </div>
-                          </div>
-                        </div>
-                        <span className="text-xs text-blue-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 shrink-0">
-                          Elegir <ArrowRight className="w-3 h-3" />
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => setIsUsingAnotherAccount(true)}
-                    className="w-full py-2 px-3 flex items-center justify-center gap-2 text-xs font-medium text-neutral-600 hover:bg-neutral-100 rounded-lg border border-dashed border-neutral-300 transition-colors cursor-pointer"
-                  >
-                    <User className="w-3.5 h-3.5 text-neutral-500" />
-                    <span>Ingresar otra dirección de Gmail manualmente</span>
-                  </button>
-                </div>
-              ) : (
-                <form onSubmit={handleCustomSubmit} className="space-y-3">
-                  <div>
-                    <label className="block text-xs font-medium text-neutral-700 mb-1">
-                      Tu dirección de Gmail *
-                    </label>
-                    <div className="relative">
-                      <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
-                      <input
-                        type="email"
-                        required
-                        placeholder="usuario@gmail.com"
-                        value={customEmail}
-                        onChange={(e) => setCustomEmail(e.target.value)}
-                        className="w-full pl-9 pr-3 py-2 text-sm border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        autoFocus
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-neutral-700 mb-1">
-                      Nombre y Apellido
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Ej: Clara Salmerón"
-                      value={customName}
-                      onChange={(e) => setCustomName(e.target.value)}
-                      className="w-full px-3 py-2 text-sm border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-
-                  <div className="flex gap-2 pt-2">
-                    <button
-                      type="button"
-                      onClick={() => setIsUsingAnotherAccount(false)}
-                      className="flex-1 py-2 text-xs font-medium text-neutral-600 hover:bg-neutral-100 rounded-lg border border-neutral-200"
-                    >
-                      Volver
-                    </button>
-                    <button
-                      type="submit"
-                      className="flex-1 py-2 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm font-semibold flex items-center justify-center gap-1.5"
-                    >
-                      <span>Vincular Gmail</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </form>
-              )}
             </div>
           )}
 
           {/* Privacy footer */}
           <div className="pt-3 border-t border-neutral-100 flex items-center justify-between text-[11px] text-neutral-400">
             <div className="flex items-center gap-1.5">
-              <Shield className="w-3 h-3 text-green-600" />
-              <span>Conexión segura Google OAuth (Gmail API)</span>
+              <Shield className="w-3.5 h-3.5 text-green-600" />
+              <span>Conexión oficial Google OAuth</span>
             </div>
-            <span>Privacidad · Condiciones</span>
+            <span>Firebase Auth</span>
           </div>
         </div>
       </div>
     </div>
   );
 };
-

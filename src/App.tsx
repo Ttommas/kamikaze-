@@ -30,6 +30,8 @@ import {
   CheckCircle, ShieldCheck, Mail, MapPin, Phone, 
   User, Lock, QrCode, LogIn, ExternalLink, Youtube 
 } from 'lucide-react';
+import { auth, mapFirebaseUserToStudent, logoutGoogleAuth } from './services/googleWorkspace';
+import { onAuthStateChanged } from 'firebase/auth';
 
 export default function App() {
   // Persistent State for Workshops
@@ -147,6 +149,28 @@ export default function App() {
       localStorage.removeItem('kmkz_student_user_v1');
     }
   }, [currentUser]);
+
+  // Automatically listen to Firebase Auth state
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (fbUser) => {
+      if (fbUser && fbUser.email) {
+        const student = mapFirebaseUserToStudent(fbUser);
+        setCurrentUser((prev) => {
+          // If we had custom local profile info (phone, doc, membership), preserve them
+          if (prev && prev.email.toLowerCase() === student.email.toLowerCase()) {
+            return {
+              ...student,
+              phone: prev.phone || student.phone,
+              doc: prev.doc || student.doc,
+              isMember: prev.isMember ?? student.isMember,
+            };
+          }
+          return student;
+        });
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
   // Handle new enrollment and automatically decrease available spots
   const handleEnrollmentComplete = (newEnrollment: Enrollment) => {
@@ -469,7 +493,7 @@ export default function App() {
         onStartEnrollmentForWorkshop={(ws) => setSelectedWorkshopForEnrollment(ws)}
       />
 
-      {/* 4. Admin & Collective Management Panel (Protected: colectivokamizaze / kamikaze2026) */}
+      {/* 4. Admin & Collective Management Panel (Protected via Firebase Google Auth: tllaneza1@gmail.com / colectivokmkz@gmail.com) */}
       <AdminEnrollmentPanel
         workshops={workshops}
         enrollments={enrollments}

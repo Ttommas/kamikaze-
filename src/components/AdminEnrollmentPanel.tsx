@@ -15,9 +15,10 @@ import {
 } from '../types';
 import { extractYouTubeId, getYouTubeThumbnailUrl } from '../utils/youtube';
 import { WorkshopEditorModal } from './WorkshopEditorModal';
-import { signInWithGoogle } from '../services/googleWorkspace';
+import { signInAdminWithGoogle, logoutGoogleAuth, auth } from '../services/googleWorkspace';
+import { onAuthStateChanged } from 'firebase/auth';
 
-// Authorized Administrator Emails
+// Authorized Administrator Emails (Whitelisted Accounts)
 const AUTHORIZED_ADMIN_EMAILS = [
   'tllaneza1@gmail.com',
   'colectivokmkz@gmail.com',
@@ -92,17 +93,33 @@ export const AdminEnrollmentPanel: React.FC<AdminEnrollmentPanelProps> = ({
     };
   }, [isOpen, onClose]);
 
-  // Authentication State (locked by default, requires established credentials)
-  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(() => {
-    return sessionStorage.getItem('kmkz_admin_auth') === 'true';
-  });
-  const [authAdminEmail, setAuthAdminEmail] = useState<string>(() => {
-    return sessionStorage.getItem('kmkz_admin_email') || '';
-  });
-  const [authUsername, setAuthUsername] = useState('');
-  const [authPassword, setAuthPassword] = useState('');
+  // Authentication State with live Firebase Auth verification
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(false);
+  const [authAdminEmail, setAuthAdminEmail] = useState<string>('');
   const [authError, setAuthError] = useState('');
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+
+  // Sync state with live Firebase Auth session
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (fbUser) => {
+      if (fbUser && fbUser.email) {
+        const userEmail = fbUser.email.toLowerCase().trim();
+        if (AUTHORIZED_ADMIN_EMAILS.includes(userEmail)) {
+          setIsAdminAuthenticated(true);
+          setAuthAdminEmail(fbUser.email);
+          setAuthError('');
+        } else {
+          setIsAdminAuthenticated(false);
+          setAuthAdminEmail('');
+        }
+      } else {
+        setIsAdminAuthenticated(false);
+        setAuthAdminEmail('');
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   // Active Admin Tab
   const [adminTab, setAdminTab] = useState<'inscripciones' | 'talleres' | 'artistas' | 'bitacora' | 'billetera' | 'eventos'>('inscripciones');
@@ -254,59 +271,40 @@ export const AdminEnrollmentPanel: React.FC<AdminEnrollmentPanelProps> = ({
     description: '',
   });
 
-  // Handle Login Authentication with strict pre-established credentials
-  const handleAdminLogin = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    const cleanUser = authUsername.trim().toLowerCase();
-    const cleanPass = authPassword.trim();
-
-    // Pre-established required credentials
-    const isUserValid = cleanUser === 'colectivokamikaze' || cleanUser === 'colectivokamizaze' || cleanUser === 'tllaneza1@gmail.com' || cleanUser === 'colectivokmkz@gmail.com';
-    const isPassValid = cleanPass === 'kamikaze2026';
-
-    if (isUserValid && isPassValid) {
-      setIsAdminAuthenticated(true);
-      setAuthAdminEmail(cleanUser.includes('@') ? cleanUser : 'Colectivokmkz@gmail.com');
-      sessionStorage.setItem('kmkz_admin_auth', 'true');
-      sessionStorage.setItem('kmkz_admin_email', cleanUser.includes('@') ? cleanUser : 'Colectivokmkz@gmail.com');
-      setAuthError('');
-    } else {
-      setAuthError('Acceso denegado: Usuario o contraseña incorrectos. Ingresá las credenciales asignadas al colectivo.');
-    }
-  };
-
-  // Google OAuth Login for Administrators
+  // Google OAuth Login for Administrators (Strictly identity scopes, no Gmail scopes)
   const handleGoogleAdminLogin = async () => {
     setIsGoogleLoading(true);
     setAuthError('');
     try {
-      const res = await signInWithGoogle();
+      const res = await signInAdminWithGoogle();
       const userEmail = (res.user.email || '').toLowerCase().trim();
 
       if (AUTHORIZED_ADMIN_EMAILS.includes(userEmail)) {
         setIsAdminAuthenticated(true);
         setAuthAdminEmail(res.user.email);
-        sessionStorage.setItem('kmkz_admin_auth', 'true');
-        sessionStorage.setItem('kmkz_admin_email', res.user.email);
         setAuthError('');
       } else {
-        setAuthError(`Acceso restringido: La cuenta "${res.user.email}" no tiene permisos de Administrador en Colectivo KAMIKAZE.`);
+        await logoutGoogleAuth();
+        setIsAdminAuthenticated(false);
+        setAuthAdminEmail('');
+        setAuthError(`Acceso denegado: La cuenta "${res.user.email}" no figura en la lista de administradores autorizados.`);
       }
     } catch (err: any) {
       console.error('Error Google Admin Auth:', err);
-      setAuthError('No se pudo completar el inicio de sesión con Google. Podés ingresar con usuario y contraseña.');
+      setAuthError('No se pudo autenticar con Google. Verificá tu conexión o intentá nuevamente.');
     } finally {
       setIsGoogleLoading(false);
     }
   };
 
-  const handleAdminLogout = () => {
+  const handleAdminLogout = async () => {
+    try {
+      await logoutGoogleAuth();
+    } catch (err) {
+      console.warn('Logout warning:', err);
+    }
     setIsAdminAuthenticated(false);
     setAuthAdminEmail('');
-    sessionStorage.removeItem('kmkz_admin_auth');
-    sessionStorage.removeItem('kmkz_admin_email');
-    setAuthUsername('');
-    setAuthPassword('');
     setAuthError('');
   };
 
@@ -465,25 +463,22 @@ export const AdminEnrollmentPanel: React.FC<AdminEnrollmentPanelProps> = ({
                 </div>
               )}
 
-              {/* 1. GOOGLE OAUTH ADMIN ACCESS */}
-              <div className="space-y-2">
-                <label className="block font-mono text-[11px] font-bold uppercase text-[#E52E33]">
-                  Ingreso Rápido con Google / Gmail
-                </label>
+              {/* GOOGLE OAUTH ADMIN ACCESS ONLY */}
+              <div className="space-y-4 pt-2">
                 <button
                   type="button"
                   onClick={handleGoogleAdminLogin}
                   disabled={isGoogleLoading}
-                  className="w-full py-3 px-4 bg-white text-neutral-800 hover:bg-neutral-50 border-2 border-[#E52E33] font-mono text-xs font-bold flex items-center justify-center gap-3 transition-colors shadow-sm cursor-pointer disabled:opacity-50"
+                  className="w-full py-3.5 px-4 bg-white text-neutral-900 hover:bg-neutral-50 border-2 border-[#E52E33] font-mono text-xs font-bold flex items-center justify-center gap-3 transition-colors shadow-md cursor-pointer disabled:opacity-50"
                 >
                   {isGoogleLoading ? (
                     <>
-                      <Loader2 className="w-4 h-4 animate-spin text-[#E52E33]" />
-                      <span>Verificando permisos de Google...</span>
+                      <Loader2 className="w-5 h-5 animate-spin text-[#E52E33]" />
+                      <span>Validando credenciales Firebase...</span>
                     </>
                   ) : (
                     <>
-                      <svg className="w-4 h-4" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5" viewBox="0 0 24 24">
                         <path
                           fill="#4285F4"
                           d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -501,63 +496,22 @@ export const AdminEnrollmentPanel: React.FC<AdminEnrollmentPanelProps> = ({
                           d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
                         />
                       </svg>
-                      <span>Ingresar con Google (tllaneza1@gmail.com)</span>
+                      <span className="text-sm">Ingresar con Cuenta de Google</span>
                     </>
                   )}
                 </button>
-                <div className="flex items-center gap-1.5 text-[10px] font-mono opacity-80 justify-center">
-                  <ShieldCheck className="w-3.5 h-3.5 text-green-800" />
-                  <span>Cuentas habilitadas: tllaneza1@gmail.com · Colectivokmkz@gmail.com</span>
+
+                <div className="p-3 bg-[#FFD41D] border border-[#E52E33] space-y-1.5 font-mono text-[11px]">
+                  <div className="flex items-center gap-1.5 font-bold text-[#E52E33]">
+                    <ShieldCheck className="w-4 h-4 text-green-800" />
+                    <span>Cuentas de Administrador Habilitadas:</span>
+                  </div>
+                  <ul className="list-disc list-inside opacity-90 pl-1 space-y-0.5 text-[10px]">
+                    <li><strong className="font-bold">tllaneza1@gmail.com</strong> (Tomás Llaneza)</li>
+                    <li><strong className="font-bold">colectivokmkz@gmail.com</strong> (Colectivo Kamikaze)</li>
+                  </ul>
                 </div>
               </div>
-
-              {/* DIVIDER */}
-              <div className="flex items-center gap-3 my-2">
-                <div className="flex-1 h-[1px] bg-[#E52E33]/40" />
-                <span className="font-mono text-[10px] uppercase font-bold text-[#E52E33]/75">
-                  o con credenciales
-                </span>
-                <div className="flex-1 h-[1px] bg-[#E52E33]/40" />
-              </div>
-
-              {/* 2. USERNAME / PASSWORD ACCESS */}
-              <form onSubmit={handleAdminLogin} className="space-y-4 font-mono text-xs">
-                <div>
-                  <label className="block font-bold uppercase mb-1">Usuario / Email Administrador *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="colectivokamikaze o tllaneza1@gmail.com"
-                    value={authUsername}
-                    onChange={(e) => setAuthUsername(e.target.value)}
-                    className="w-full px-3 py-2.5 bg-[#FFD41D] border-2 border-[#E52E33] font-bold text-sm focus:outline-none focus:bg-yellow-300"
-                  />
-                  <span className="text-[10px] opacity-75 mt-1 block">Usuario: colectivokamikaze o tllaneza1@gmail.com</span>
-                </div>
-
-                <div>
-                  <label className="block font-bold uppercase mb-1">Contraseña *</label>
-                  <input
-                    type="password"
-                    required
-                    placeholder="••••••••"
-                    value={authPassword}
-                    onChange={(e) => setAuthPassword(e.target.value)}
-                    className="w-full px-3 py-2.5 bg-[#FFD41D] border-2 border-[#E52E33] font-bold text-sm focus:outline-none focus:bg-yellow-300"
-                  />
-                  <span className="text-[10px] opacity-75 mt-1 block">Contraseña: kamikaze2026</span>
-                </div>
-
-                <div className="pt-2">
-                  <button
-                    type="submit"
-                    className="btn-brand-inverse w-full py-3.5 uppercase tracking-wider font-bold text-xs flex items-center justify-center gap-2 cursor-pointer shadow-md text-sm"
-                  >
-                    <Key className="w-4 h-4" />
-                    <span>Ingresar con Contraseña</span>
-                  </button>
-                </div>
-              </form>
             </div>
           </div>
         ) : (

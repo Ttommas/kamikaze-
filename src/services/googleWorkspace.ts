@@ -34,6 +34,11 @@ export const SCOPES = [
 const provider = new GoogleAuthProvider();
 SCOPES.forEach((scope) => provider.addScope(scope));
 
+// Admin provider (strictly authentication, without requesting Gmail sending scope)
+const adminProvider = new GoogleAuthProvider();
+adminProvider.addScope('https://www.googleapis.com/auth/userinfo.email');
+adminProvider.addScope('https://www.googleapis.com/auth/userinfo.profile');
+
 // In-memory token cache (strictly in-memory, not in storage)
 let cachedAccessToken: string | null = null;
 let cachedUser: StudentUser | null = null;
@@ -58,6 +63,24 @@ export const mapFirebaseUserToStudent = (fbUser: FirebaseUser): StudentUser => {
     provider: 'google',
     createdAt: fbUser.metadata.creationTime || new Date().toISOString(),
   };
+};
+
+// Admin authentication with Google (identity only)
+export const signInAdminWithGoogle = async (): Promise<{
+  user: StudentUser;
+  rawUser: FirebaseUser;
+}> => {
+  try {
+    const result = await signInWithPopup(auth, adminProvider);
+    const studentUser = mapFirebaseUserToStudent(result.user);
+    return {
+      user: studentUser,
+      rawUser: result.user,
+    };
+  } catch (error: any) {
+    console.error('Error en Google Admin Sign-In:', error);
+    throw error;
+  }
 };
 
 // Listen to auth state
