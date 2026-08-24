@@ -50,6 +50,8 @@ import {
   saveBitacoraEntriesToFirestore,
   saveEventsToFirestore,
   saveArtistsToFirestore,
+  saveWorkshopsListToFirestore,
+  saveAllDataToFirestore,
 } from './services/firestoreService';
 
 export default function App() {
@@ -326,6 +328,29 @@ export default function App() {
     saveArtistsToFirestore(newArtists).catch((e) => console.error('Error saving artists online:', e));
   };
 
+  const handleSaveWorkshopsList = (newList: Workshop[]) => {
+    setWorkshops(newList);
+    saveWorkshopsListToFirestore(newList).catch((e) => console.error('Error saving workshops list online:', e));
+  };
+
+  const handleSaveAllChanges = async () => {
+    try {
+      await saveAllDataToFirestore({
+        workshops,
+        enrollments,
+        walletConfig,
+        bitacoraVideo,
+        bitacoraEntries,
+        events,
+        artists,
+      });
+      return true;
+    } catch (err) {
+      console.error('Error in handleSaveAllChanges:', err);
+      throw err;
+    }
+  };
+
   // User Enrollments count
   const myEnrollmentsCount = currentUser
     ? enrollments.filter((e) => e.studentEmail.toLowerCase() === currentUser.email.toLowerCase()).length
@@ -597,6 +622,8 @@ export default function App() {
         onSaveBitacoraEntries={handleSaveBitacoraEntries}
         onSaveEvents={handleSaveEvents}
         onSaveArtists={handleSaveArtists}
+        onSaveWorkshopsList={handleSaveWorkshopsList}
+        onSaveAllChanges={handleSaveAllChanges}
       />
 
       {/* 5. Propose Workshop / Artwork Modal */}

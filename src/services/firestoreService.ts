@@ -355,3 +355,78 @@ export async function saveArtistsToFirestore(artists: Artist[]) {
     throw err;
   }
 }
+
+export async function saveWorkshopsListToFirestore(workshops: Workshop[]) {
+  try {
+    const batch = writeBatch(db);
+    workshops.forEach((ws) => {
+      const docRef = doc(db, 'workshops', ws.id);
+      batch.set(docRef, ws, { merge: true });
+    });
+    await batch.commit();
+    console.log('All workshops batch-saved to Firestore');
+  } catch (err) {
+    console.error('Error batch-saving workshops to Firestore:', err);
+    throw err;
+  }
+}
+
+export async function saveAllDataToFirestore(data: {
+  workshops?: Workshop[];
+  enrollments?: Enrollment[];
+  walletConfig?: WalletConfig;
+  bitacoraVideo?: BitacoraVideoConfig;
+  bitacoraEntries?: BitacoraEntry[];
+  events?: EventItem[];
+  artists?: Artist[];
+}) {
+  try {
+    const batch = writeBatch(db);
+
+    if (data.workshops) {
+      data.workshops.forEach((w) => {
+        batch.set(doc(db, 'workshops', w.id), w, { merge: true });
+      });
+    }
+
+    if (data.enrollments) {
+      data.enrollments.forEach((enr) => {
+        batch.set(doc(db, 'enrollments', enr.id), enr, { merge: true });
+      });
+    }
+
+    if (data.walletConfig) {
+      batch.set(doc(db, 'config', 'wallet'), data.walletConfig, { merge: true });
+    }
+
+    if (data.bitacoraVideo) {
+      batch.set(doc(db, 'config', 'bitacora_video'), data.bitacoraVideo, { merge: true });
+    }
+
+    if (data.bitacoraEntries) {
+      data.bitacoraEntries.forEach((entry) => {
+        batch.set(doc(db, 'bitacora_entries', entry.id), entry, { merge: true });
+      });
+    }
+
+    if (data.events) {
+      data.events.forEach((ev) => {
+        batch.set(doc(db, 'events', ev.id), ev, { merge: true });
+      });
+    }
+
+    if (data.artists) {
+      data.artists.forEach((art) => {
+        batch.set(doc(db, 'artists', art.id), art, { merge: true });
+      });
+    }
+
+    await batch.commit();
+    console.log('All data successfully synced to Firestore!');
+    return true;
+  } catch (error) {
+    console.error('Error syncing all data to Firestore:', error);
+    throw error;
+  }
+}
+

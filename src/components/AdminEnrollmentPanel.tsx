@@ -56,6 +56,8 @@ interface AdminEnrollmentPanelProps {
   onSaveBitacoraEntries: (entries: BitacoraEntry[]) => void;
   onSaveEvents: (events: EventItem[]) => void;
   onSaveArtists: (artists: Artist[]) => void;
+  onSaveWorkshopsList?: (workshops: Workshop[]) => void;
+  onSaveAllChanges?: () => Promise<boolean | void> | void;
 }
 
 export const AdminEnrollmentPanel: React.FC<AdminEnrollmentPanelProps> = ({
@@ -78,6 +80,8 @@ export const AdminEnrollmentPanel: React.FC<AdminEnrollmentPanelProps> = ({
   onSaveBitacoraEntries,
   onSaveEvents,
   onSaveArtists,
+  onSaveWorkshopsList,
+  onSaveAllChanges,
 }) => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -123,6 +127,36 @@ export const AdminEnrollmentPanel: React.FC<AdminEnrollmentPanelProps> = ({
 
   // Active Admin Tab
   const [adminTab, setAdminTab] = useState<'inscripciones' | 'talleres' | 'artistas' | 'bitacora' | 'billetera' | 'eventos'>('inscripciones');
+
+  // Global Save & Cloud Sync States
+  const [isSavingGlobal, setIsSavingGlobal] = useState(false);
+  const [globalSaveSuccess, setGlobalSaveSuccess] = useState(false);
+  const [lastSyncTime, setLastSyncTime] = useState<string>(
+    new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })
+  );
+  const [enrollmentToast, setEnrollmentToast] = useState<string | null>(null);
+  const [workshopsSavedSuccess, setWorkshopsSavedSuccess] = useState(false);
+  const [eventsSavedSuccess, setEventsSavedSuccess] = useState(false);
+  const [bitacoraEntriesSavedSuccess, setBitacoraEntriesSavedSuccess] = useState(false);
+
+  const handleTriggerSaveAll = async () => {
+    setIsSavingGlobal(true);
+    setGlobalSaveSuccess(false);
+    try {
+      if (onSaveAllChanges) {
+        await onSaveAllChanges();
+      }
+      setGlobalSaveSuccess(true);
+      setLastSyncTime(
+        new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+      );
+      setTimeout(() => setGlobalSaveSuccess(false), 4500);
+    } catch (err) {
+      console.error('Error saving all changes to cloud:', err);
+    } finally {
+      setIsSavingGlobal(false);
+    }
+  };
 
   // Filters for Enrollments
   const [searchQuery, setSearchQuery] = useState('');
@@ -420,7 +454,35 @@ export const AdminEnrollmentPanel: React.FC<AdminEnrollmentPanelProps> = ({
 
           <div className="flex items-center gap-2">
             {isAdminAuthenticated && (
-              <div className="flex items-center gap-2 mr-1">
+              <>
+                <button
+                  onClick={handleTriggerSaveAll}
+                  disabled={isSavingGlobal}
+                  className={`px-3 sm:px-4 py-1.5 text-xs font-mono uppercase font-black flex items-center gap-1.5 border-2 shadow-md transition-all cursor-pointer ${
+                    globalSaveSuccess
+                      ? 'bg-green-700 text-white border-green-900 scale-105'
+                      : 'bg-[#E52E33] text-[#FFD41D] border-[#E52E33] hover:bg-black hover:text-white'
+                  }`}
+                  title="Guardar todos los cambios realizados y sincronizar en Firestore"
+                >
+                  {isSavingGlobal ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Guardando...</span>
+                    </>
+                  ) : globalSaveSuccess ? (
+                    <>
+                      <CheckCircle2 className="w-3.5 h-3.5 text-green-200" />
+                      <span>¡Cambios Guardados!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-3.5 h-3.5" />
+                      <span>Guardar Cambios</span>
+                    </>
+                  )}
+                </button>
+
                 <div className="hidden md:flex flex-col text-right font-mono">
                   <span className="text-[10px] font-bold uppercase text-[#E52E33]">Admin Activo</span>
                   <span className="text-[10px] opacity-75">{authAdminEmail || 'Colectivokmkz@gmail.com'}</span>
@@ -433,7 +495,7 @@ export const AdminEnrollmentPanel: React.FC<AdminEnrollmentPanelProps> = ({
                   <LogOut className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">Cerrar Sesión</span>
                 </button>
-              </div>
+              </>
             )}
             <button
               onClick={onClose}
@@ -595,6 +657,28 @@ export const AdminEnrollmentPanel: React.FC<AdminEnrollmentPanelProps> = ({
               </button>
             </div>
 
+            {/* Global Animated Save Notification Banner */}
+            {globalSaveSuccess && (
+              <div className="bg-green-700 text-white font-mono text-xs font-bold px-6 py-2.5 flex items-center justify-between border-b-2 border-[#E52E33] shadow-inner animate-in fade-in slide-in-from-top-2">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-green-200 shrink-0" />
+                  <span>✓ ¡Todos los cambios han sido guardados con éxito e impactados en tiempo real en la nube!</span>
+                </div>
+                <span className="text-[10px] opacity-80 uppercase">Sincronizado: {lastSyncTime}</span>
+              </div>
+            )}
+
+            {/* Enrollment Toast */}
+            {enrollmentToast && (
+              <div className="bg-emerald-800 text-emerald-100 font-mono text-xs font-bold px-6 py-2 flex items-center justify-between border-b border-[#E52E33]">
+                <div className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-emerald-300" />
+                  <span>{enrollmentToast}</span>
+                </div>
+                <span className="text-[10px] uppercase font-bold text-emerald-300">Guardado en Firestore</span>
+              </div>
+            )}
+
             {/* TAB CONTENT CONTAINER */}
             <div className="flex-1 p-6 overflow-y-auto bg-[#FFD41D]">
               
@@ -645,13 +729,28 @@ export const AdminEnrollmentPanel: React.FC<AdminEnrollmentPanelProps> = ({
                       </select>
                     </div>
 
-                    <button
-                      onClick={handleExportCSV}
-                      className="btn-brand-inverse px-4 py-1.5 text-xs font-mono uppercase font-bold flex items-center gap-2 shrink-0 cursor-pointer"
-                    >
-                      <Download className="w-3.5 h-3.5" />
-                      <span>Exportar CSV / Excel</span>
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          handleTriggerSaveAll();
+                          setEnrollmentToast('Nómina e inscripciones guardadas y sincronizadas');
+                          setTimeout(() => setEnrollmentToast(null), 3500);
+                        }}
+                        className="btn-brand px-3.5 py-1.5 text-xs font-mono uppercase font-bold flex items-center gap-1.5 shrink-0 cursor-pointer shadow-sm"
+                        title="Guardar estado de las inscripciones en la nube"
+                      >
+                        <Save className="w-3.5 h-3.5" />
+                        <span>Guardar Nómina</span>
+                      </button>
+
+                      <button
+                        onClick={handleExportCSV}
+                        className="btn-brand-inverse px-3.5 py-1.5 text-xs font-mono uppercase font-bold flex items-center gap-1.5 shrink-0 cursor-pointer"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        <span>Exportar CSV</span>
+                      </button>
+                    </div>
                   </div>
 
                   {/* Enrollments Table */}
@@ -724,7 +823,12 @@ export const AdminEnrollmentPanel: React.FC<AdminEnrollmentPanelProps> = ({
                               <td className="p-2.5 whitespace-nowrap">
                                 <select
                                   value={enr.paymentStatus}
-                                  onChange={(e) => onUpdateEnrollmentStatus(enr.id, e.target.value as PaymentStatus)}
+                                  onChange={(e) => {
+                                    const newSt = e.target.value as PaymentStatus;
+                                    onUpdateEnrollmentStatus(enr.id, newSt);
+                                    setEnrollmentToast(`Estado de "${enr.studentName}" actualizado a "${newSt.toUpperCase()}" y guardado`);
+                                    setTimeout(() => setEnrollmentToast(null), 3500);
+                                  }}
                                   className={`px-2 py-1 border font-bold text-[11px] uppercase ${
                                     enr.paymentStatus === 'confirmado'
                                       ? 'bg-green-700 text-white border-green-800'
@@ -764,7 +868,7 @@ export const AdminEnrollmentPanel: React.FC<AdminEnrollmentPanelProps> = ({
               {/* ================= TAB 2: TALLERES Y CUPOS ================= */}
               {adminTab === 'talleres' && (
                 <div className="space-y-6">
-                  <div className="flex justify-between items-center">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <div>
                       <h3 className="brand-title text-2xl font-bold">Catálogo de Talleres</h3>
                       <p className="text-xs font-mono opacity-85">
@@ -772,14 +876,37 @@ export const AdminEnrollmentPanel: React.FC<AdminEnrollmentPanelProps> = ({
                       </p>
                     </div>
 
-                    <button
-                      onClick={() => setIsCreatingWorkshop(true)}
-                      className="btn-brand-inverse px-4 py-2 text-xs font-mono uppercase font-bold flex items-center gap-2 cursor-pointer shadow-md"
-                    >
-                      <Plus className="w-4 h-4" />
-                      <span>+ Crear Nuevo Taller</span>
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          if (onSaveWorkshopsList) onSaveWorkshopsList(workshops);
+                          handleTriggerSaveAll();
+                          setWorkshopsSavedSuccess(true);
+                          setTimeout(() => setWorkshopsSavedSuccess(false), 3500);
+                        }}
+                        className="btn-brand px-4 py-2 text-xs font-mono uppercase font-bold flex items-center gap-2 cursor-pointer shadow-md"
+                        title="Guardar catálogo de talleres en Firestore"
+                      >
+                        <Save className="w-4 h-4" />
+                        <span>Guardar Talleres</span>
+                      </button>
+
+                      <button
+                        onClick={() => setIsCreatingWorkshop(true)}
+                        className="btn-brand-inverse px-4 py-2 text-xs font-mono uppercase font-bold flex items-center gap-2 cursor-pointer shadow-md"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>+ Crear Taller</span>
+                      </button>
+                    </div>
                   </div>
+
+                  {workshopsSavedSuccess && (
+                    <div className="p-3 bg-green-800 text-white font-mono text-xs font-bold flex items-center gap-2">
+                      <Check className="w-4 h-4" />
+                      <span>¡Lista de talleres guardada con éxito e impactada en la web!</span>
+                    </div>
+                  )}
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {workshops.map((ws) => (
@@ -853,24 +980,40 @@ export const AdminEnrollmentPanel: React.FC<AdminEnrollmentPanelProps> = ({
                         </div>
                       </div>
 
-                      <button
-                        onClick={() => {
-                          setNewArtistData({
-                            id: 'art-' + Date.now(),
-                            name: '',
-                            discipline: 'Dibujo & Artes Visuales',
-                            bio: '',
-                            portraitLabel: `[ retrato · 0${artists.length + 1} ]`,
-                            avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=600&auto=format&fit=crop',
-                            statement: 'El accidente como materia viva y desborde.',
-                          });
-                          setIsCreatingArtist(true);
-                        }}
-                        className="btn-brand-inverse px-4 py-2.5 uppercase font-mono font-bold text-xs flex items-center gap-2 cursor-pointer shadow-md shrink-0"
-                      >
-                        <Plus className="w-4 h-4" />
-                        <span>+ Agregar Integrante</span>
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => {
+                            onSaveArtists(artists);
+                            handleTriggerSaveAll();
+                            setArtistSavedSuccess(true);
+                            setTimeout(() => setArtistSavedSuccess(false), 3500);
+                          }}
+                          className="btn-brand px-4 py-2.5 uppercase font-mono font-bold text-xs flex items-center gap-2 cursor-pointer shadow-md shrink-0"
+                          title="Guardar lista de integrantes en Firestore"
+                        >
+                          <Save className="w-4 h-4" />
+                          <span>Guardar Integrantes</span>
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            setNewArtistData({
+                              id: 'art-' + Date.now(),
+                              name: '',
+                              discipline: 'Dibujo & Artes Visuales',
+                              bio: '',
+                              portraitLabel: `[ retrato · 0${artists.length + 1} ]`,
+                              avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=600&auto=format&fit=crop',
+                              statement: 'El accidente como materia viva y desborde.',
+                            });
+                            setIsCreatingArtist(true);
+                          }}
+                          className="btn-brand-inverse px-4 py-2.5 uppercase font-mono font-bold text-xs flex items-center gap-2 cursor-pointer shadow-md shrink-0"
+                        >
+                          <Plus className="w-4 h-4" />
+                          <span>+ Agregar Integrante</span>
+                        </button>
+                      </div>
                     </div>
 
                     {artistSavedSuccess && (
@@ -1135,20 +1278,43 @@ export const AdminEnrollmentPanel: React.FC<AdminEnrollmentPanelProps> = ({
 
                   {/* 2. Weekly Written Notes */}
                   <div className="space-y-4">
-                    <div className="flex justify-between items-center">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                       <div>
                         <h4 className="brand-title text-xl font-bold">01. Notas semanales</h4>
                         <p className="text-xs font-mono opacity-80">Publicaciones de bitácora teórica y reflexiones.</p>
                       </div>
 
-                      <button
-                        onClick={() => setIsCreatingBitacoraEntry(true)}
-                        className="btn-brand px-3 py-1.5 text-xs font-mono uppercase font-bold flex items-center gap-1.5 cursor-pointer"
-                      >
-                        <Plus className="w-3.5 h-3.5" />
-                        <span>+ Nueva Nota Semanal</span>
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => {
+                            onSaveBitacoraEntries(bitacoraEntries);
+                            handleTriggerSaveAll();
+                            setBitacoraEntriesSavedSuccess(true);
+                            setTimeout(() => setBitacoraEntriesSavedSuccess(false), 3500);
+                          }}
+                          className="btn-brand px-3.5 py-1.5 text-xs font-mono uppercase font-bold flex items-center gap-1.5 cursor-pointer shadow-sm"
+                          title="Guardar notas semanales en Firestore"
+                        >
+                          <Save className="w-3.5 h-3.5" />
+                          <span>Guardar Notas</span>
+                        </button>
+
+                        <button
+                          onClick={() => setIsCreatingBitacoraEntry(true)}
+                          className="btn-brand-inverse px-3.5 py-1.5 text-xs font-mono uppercase font-bold flex items-center gap-1.5 cursor-pointer"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>+ Nueva Nota Semanal</span>
+                        </button>
+                      </div>
                     </div>
+
+                    {bitacoraEntriesSavedSuccess && (
+                      <div className="p-3 bg-green-800 text-white font-mono text-xs font-bold flex items-center gap-2">
+                        <Check className="w-4 h-4" />
+                        <span>¡Notas de la bitácora guardadas e impactadas con éxito!</span>
+                      </div>
+                    )}
 
                     <div className="space-y-3">
                       {bitacoraEntries.map((note) => (
@@ -1324,20 +1490,43 @@ export const AdminEnrollmentPanel: React.FC<AdminEnrollmentPanelProps> = ({
               {/* ================= TAB 5: AGENDA Y EVENTOS ================= */}
               {adminTab === 'eventos' && (
                 <div className="space-y-6">
-                  <div className="flex justify-between items-center">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <div>
                       <h3 className="brand-title text-2xl font-bold">Agenda de Aperturas & Eventos</h3>
                       <p className="text-xs font-mono opacity-80">Muestras abiertas, charlas y cierres de temporada.</p>
                     </div>
 
-                    <button
-                      onClick={() => setIsCreatingEvent(true)}
-                      className="btn-brand px-3 py-1.5 text-xs font-mono uppercase font-bold flex items-center gap-1.5 cursor-pointer"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>+ Crear Evento</span>
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          onSaveEvents(events);
+                          handleTriggerSaveAll();
+                          setEventsSavedSuccess(true);
+                          setTimeout(() => setEventsSavedSuccess(false), 3500);
+                        }}
+                        className="btn-brand px-3.5 py-1.5 text-xs font-mono uppercase font-bold flex items-center gap-1.5 cursor-pointer shadow-sm"
+                        title="Guardar agenda y eventos en Firestore"
+                      >
+                        <Save className="w-3.5 h-3.5" />
+                        <span>Guardar Agenda</span>
+                      </button>
+
+                      <button
+                        onClick={() => setIsCreatingEvent(true)}
+                        className="btn-brand-inverse px-3.5 py-1.5 text-xs font-mono uppercase font-bold flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>+ Crear Evento</span>
+                      </button>
+                    </div>
                   </div>
+
+                  {eventsSavedSuccess && (
+                    <div className="p-3 bg-green-800 text-white font-mono text-xs font-bold flex items-center gap-2">
+                      <Check className="w-4 h-4" />
+                      <span>¡Agenda de eventos guardada e impactada con éxito!</span>
+                    </div>
+                  )}
 
                   <div className="space-y-3">
                     {events.map((evt) => (
@@ -1366,6 +1555,57 @@ export const AdminEnrollmentPanel: React.FC<AdminEnrollmentPanelProps> = ({
                 </div>
               )}
 
+            </div>
+
+            {/* STICKY BOTTOM ACTIONS & FIRESTORE STATUS FOOTER */}
+            <div className="bg-[#f0c510] border-t-2 border-[#E52E33] px-6 py-3 shrink-0 flex flex-col sm:flex-row items-center justify-between gap-3 font-mono text-xs">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <span className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-green-600"></span>
+                  </span>
+                  <span className="font-bold uppercase tracking-wider text-[11px]">
+                    Firestore Cloud Database: Conectado
+                  </span>
+                </div>
+                <span className="text-[10px] opacity-75 hidden md:inline">
+                  | Última sincronización: {lastSyncTime}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+                <button
+                  type="button"
+                  onClick={handleTriggerSaveAll}
+                  disabled={isSavingGlobal}
+                  className={`w-full sm:w-auto px-6 py-2 uppercase font-mono font-bold text-xs flex items-center justify-center gap-2 border-2 border-[#E52E33] transition-all cursor-pointer shadow-md ${
+                    isSavingGlobal
+                      ? 'bg-neutral-300 text-neutral-600 border-neutral-400 cursor-not-allowed'
+                      : globalSaveSuccess
+                      ? 'bg-green-700 text-white border-green-800'
+                      : 'bg-[#E52E33] text-[#FFD41D] hover:bg-black hover:text-[#FFD41D]'
+                  }`}
+                  title="Impactar todos los cambios en Firestore de inmediato"
+                >
+                  {isSavingGlobal ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Guardando en la Nube...</span>
+                    </>
+                  ) : globalSaveSuccess ? (
+                    <>
+                      <CheckCircle2 className="w-4 h-4 text-green-200" />
+                      <span>¡Cambios Guardados e Impactados!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4" />
+                      <span>Guardar Todos los Cambios</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         )}
