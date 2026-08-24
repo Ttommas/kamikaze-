@@ -35,9 +35,6 @@ export const WorkAxesSection: React.FC = () => {
         <h2 className="text-xs font-normal tracking-[0.2em] uppercase brand-title">
           Ejes de trabajo
         </h2>
-        <span className="text-xs tracking-[0.16em] uppercase font-mono">
-          Metodología Kamikaze
-        </span>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-[#E52E33]">

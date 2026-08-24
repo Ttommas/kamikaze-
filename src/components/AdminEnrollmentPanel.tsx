@@ -13,6 +13,7 @@ import {
   WorkshopDiscipline, WorkshopModality 
 } from '../types';
 import { extractYouTubeId, getYouTubeThumbnailUrl } from '../utils/youtube';
+import { WorkshopEditorModal } from './WorkshopEditorModal';
 
 const ARTIST_PHOTO_PRESETS = [
   { name: 'Retrato 01', url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=600&auto=format&fit=crop' },
@@ -83,10 +84,12 @@ export const AdminEnrollmentPanel: React.FC<AdminEnrollmentPanelProps> = ({
     };
   }, [isOpen, onClose]);
 
-  // Authentication State
-  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(true);
-  const [authUsername, setAuthUsername] = useState('colectivokamikaze');
-  const [authPassword, setAuthPassword] = useState('kamikaze2026');
+  // Authentication State (locked by default, requires established credentials)
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(() => {
+    return sessionStorage.getItem('kmkz_admin_auth') === 'true';
+  });
+  const [authUsername, setAuthUsername] = useState('');
+  const [authPassword, setAuthPassword] = useState('');
   const [authError, setAuthError] = useState('');
 
   // Active Admin Tab
@@ -200,7 +203,7 @@ export const AdminEnrollmentPanel: React.FC<AdminEnrollmentPanelProps> = ({
     ],
     materialsIncluded: ['Todos los materiales de trabajo incluidos'],
     requirements: 'No se requieren conocimientos previos.',
-    location: 'Taller Central Kamikaze (Pasaje El Accidente 1420)',
+    location: 'Taller Central Kamikaze (Brandsen 2032, Barracas)',
     active: true,
   });
 
@@ -239,38 +242,31 @@ export const AdminEnrollmentPanel: React.FC<AdminEnrollmentPanelProps> = ({
     description: '',
   });
 
-  // Handle Login Authentication
+  // Handle Login Authentication with strict pre-established credentials
   const handleAdminLogin = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     const cleanUser = authUsername.trim().toLowerCase();
     const cleanPass = authPassword.trim();
 
-    const validUsers = ['colectivokamikaze', 'colectivokamizaze', 'admin', 'administrador', 'kamikaze', 'colectivo'];
-    const validPasswords = ['kamikaze2026', 'admin', 'kamikaze', '123456', 'admin123'];
+    // Pre-established required credentials
+    const isUserValid = cleanUser === 'colectivokamikaze' || cleanUser === 'colectivokamizaze';
+    const isPassValid = cleanPass === 'kamikaze2026';
 
-    // If direct click with preset or any valid combo
-    if (
-      validUsers.includes(cleanUser) ||
-      validPasswords.includes(cleanPass) ||
-      cleanPass === 'kamikaze2026' ||
-      cleanUser.length > 0 ||
-      !cleanUser
-    ) {
+    if (isUserValid && isPassValid) {
       setIsAdminAuthenticated(true);
       sessionStorage.setItem('kmkz_admin_auth', 'true');
-      localStorage.setItem('kmkz_admin_auth', 'true');
       setAuthError('');
     } else {
-      setAuthError('Usuario o contraseña incorrectos. Verificá las credenciales o usá el acceso directo.');
+      setAuthError('Acceso denegado: Usuario o contraseña incorrectos. Ingresá las credenciales asignadas al colectivo.');
     }
   };
 
   const handleAdminLogout = () => {
     setIsAdminAuthenticated(false);
     sessionStorage.removeItem('kmkz_admin_auth');
-    localStorage.removeItem('kmkz_admin_auth');
-    setAuthUsername('colectivokamikaze');
-    setAuthPassword('kamikaze2026');
+    setAuthUsername('');
+    setAuthPassword('');
+    setAuthError('');
   };
 
   // Filtered enrollments
@@ -344,42 +340,6 @@ export const AdminEnrollmentPanel: React.FC<AdminEnrollmentPanelProps> = ({
     onSaveWalletConfig(walletForm);
     setWalletSavedSuccess(true);
     setTimeout(() => setWalletSavedSuccess(false), 3000);
-  };
-
-  const handleCreateWorkshopSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newWorkshopData.title) return;
-
-    const created: Workshop = {
-      id: 'ws-' + Date.now(),
-      code: newWorkshopData.code || 'WS-' + Math.floor(Math.random() * 90 + 10),
-      title: newWorkshopData.title,
-      subtitle: newWorkshopData.subtitle || '',
-      season: newWorkshopData.season || 'Temporada 06',
-      discipline: (newWorkshopData.discipline as WorkshopDiscipline) || 'dibujo',
-      modality: (newWorkshopData.modality as WorkshopModality) || 'presencial',
-      schedule: newWorkshopData.schedule || 'A coordinar',
-      dates: newWorkshopData.dates || 'Próximamente',
-      duration: newWorkshopData.duration || '4 clases',
-      totalSpots: Number(newWorkshopData.totalSpots) || 10,
-      availableSpots: Number(newWorkshopData.availableSpots) || 10,
-      regularPrice: Number(newWorkshopData.regularPrice) || 20000,
-      memberPrice: Number(newWorkshopData.memberPrice) || 16000,
-      teacherName: newWorkshopData.teacherName || 'Docente Kamikaze',
-      teacherRole: newWorkshopData.teacherRole || 'Artista visual',
-      teacherBio: newWorkshopData.teacherBio || '',
-      teacherAvatar: newWorkshopData.teacherAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop',
-      description: newWorkshopData.description || '',
-      syllabus: Array.isArray(newWorkshopData.syllabus) ? newWorkshopData.syllabus : ['Clase 1: Inicio'],
-      materialsIncluded: Array.isArray(newWorkshopData.materialsIncluded) ? newWorkshopData.materialsIncluded : ['Materiales incluidos'],
-      requirements: newWorkshopData.requirements || 'Sin requisitos previos.',
-      location: newWorkshopData.location || 'Pasaje El Accidente 1420, CABA',
-      active: true,
-      featured: false,
-    };
-
-    onAddWorkshop(created);
-    setIsCreatingWorkshop(false);
   };
 
   if (!isOpen) return null;
@@ -460,16 +420,17 @@ export const AdminEnrollmentPanel: React.FC<AdminEnrollmentPanelProps> = ({
 
               <form onSubmit={handleAdminLogin} className="space-y-4 font-mono text-xs">
                 <div>
-                  <label className="block font-bold uppercase mb-1">Usuario de Administrador *</label>
+                  <label className="block font-bold uppercase mb-1">Usuario Administrador *</label>
                   <input
                     type="text"
                     required
+                    autoFocus
                     placeholder="colectivokamikaze"
                     value={authUsername}
                     onChange={(e) => setAuthUsername(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#FFD41D] border border-[#E52E33] font-bold text-sm"
+                    className="w-full px-3 py-2.5 bg-[#FFD41D] border-2 border-[#E52E33] font-bold text-sm focus:outline-none focus:bg-yellow-300"
                   />
-                  <span className="text-[10px] opacity-80 mt-1 block">Usuario asignado: colectivokamikaze o admin</span>
+                  <span className="text-[10px] opacity-75 mt-1 block">Usuario oficial: colectivokamikaze</span>
                 </div>
 
                 <div>
@@ -480,27 +441,18 @@ export const AdminEnrollmentPanel: React.FC<AdminEnrollmentPanelProps> = ({
                     placeholder="••••••••"
                     value={authPassword}
                     onChange={(e) => setAuthPassword(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#FFD41D] border border-[#E52E33] font-bold text-sm"
+                    className="w-full px-3 py-2.5 bg-[#FFD41D] border-2 border-[#E52E33] font-bold text-sm focus:outline-none focus:bg-yellow-300"
                   />
-                  <span className="text-[10px] opacity-80 mt-1 block">Contraseña asignada: kamikaze2026</span>
+                  <span className="text-[10px] opacity-75 mt-1 block">Contraseña: kamikaze2026</span>
                 </div>
 
-                <div className="space-y-2 pt-2">
+                <div className="pt-2">
                   <button
                     type="submit"
                     className="btn-brand-inverse w-full py-3.5 uppercase tracking-wider font-bold text-xs flex items-center justify-center gap-2 cursor-pointer shadow-md text-sm"
                   >
                     <Key className="w-4 h-4" />
-                    <span>Entrar al Panel de Control</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleAdminLogin()}
-                    className="w-full py-2 bg-[#FFD41D] border-2 border-dashed border-[#E52E33] text-[#E52E33] font-bold text-[11px] uppercase tracking-wider hover:bg-[#E52E33] hover:text-[#FFD41D] transition-colors cursor-pointer flex items-center justify-center gap-1.5"
-                  >
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>Acceso Rápido Directo con 1 Clic</span>
+                    <span>Ingresar al Panel de Gestión</span>
                   </button>
                 </div>
               </form>
@@ -1011,7 +963,7 @@ export const AdminEnrollmentPanel: React.FC<AdminEnrollmentPanelProps> = ({
                         <Youtube className="w-6 h-6 text-red-600 fill-current" />
                         <div>
                           <h3 className="brand-title text-2xl font-bold">
-                            Video Principal de la Bitácora (YouTube)
+                            02. Bitácora audiovisual (YouTube)
                           </h3>
                           <p className="text-xs font-mono opacity-80">
                             Cargá cualquier enlace de YouTube para actualizar el video audiovisual que se ve en la Home en vivo.
@@ -1125,7 +1077,7 @@ export const AdminEnrollmentPanel: React.FC<AdminEnrollmentPanelProps> = ({
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <div>
-                        <h4 className="brand-title text-xl font-bold">01. Notas Semanales de Taller (Escrito)</h4>
+                        <h4 className="brand-title text-xl font-bold">01. Notas semanales</h4>
                         <p className="text-xs font-mono opacity-80">Publicaciones de bitácora teórica y reflexiones.</p>
                       </div>
 
@@ -1409,299 +1361,28 @@ export const AdminEnrollmentPanel: React.FC<AdminEnrollmentPanelProps> = ({
       )}
 
       {/* ================= SUB-MODAL: CREAR TALLER ================= */}
-      {isCreatingWorkshop && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm">
-          <div className="bg-[#FFD41D] text-[#E52E33] border-3 border-[#E52E33] w-full max-w-2xl p-6 shadow-2xl space-y-4 max-h-[88vh] overflow-y-auto">
-            <div className="flex justify-between items-center border-b border-[#E52E33] pb-2">
-              <span className="font-mono text-xs uppercase font-bold tracking-wider">
-                + Crear Nuevo Taller / Convocatoria
-              </span>
-              <button onClick={() => setIsCreatingWorkshop(false)} className="p-1 border border-[#E52E33]">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleCreateWorkshopSubmit} className="space-y-4 font-mono text-xs">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-bold uppercase mb-1">Código *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="CER-03"
-                    value={newWorkshopData.code}
-                    onChange={(e) => setNewWorkshopData({ ...newWorkshopData, code: e.target.value })}
-                    className="w-full px-3 py-1.5 bg-[#f0c510] border border-[#E52E33]"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold uppercase mb-1">Disciplina *</label>
-                  <select
-                    value={newWorkshopData.discipline}
-                    onChange={(e) => setNewWorkshopData({ ...newWorkshopData, discipline: e.target.value as any })}
-                    className="w-full px-3 py-1.5 bg-[#f0c510] border border-[#E52E33]"
-                  >
-                    <option value="dibujo">Dibujo</option>
-                    <option value="ceramica">Cerámica</option>
-                    <option value="escritura">Escritura</option>
-                    <option value="textil">Textil</option>
-                    <option value="sonido">Sonido</option>
-                    <option value="fotografia">Fotografía</option>
-                    <option value="escultura">Escultura</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-bold uppercase mb-1">Título del Taller *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Ej: Laboratorio de tintas botánicas"
-                  value={newWorkshopData.title}
-                  onChange={(e) => setNewWorkshopData({ ...newWorkshopData, title: e.target.value })}
-                  className="w-full px-3 py-1.5 bg-[#f0c510] border border-[#E52E33] font-bold text-sm"
-                />
-              </div>
-
-              <div>
-                <label className="block font-bold uppercase mb-1">Subtítulo / Concepto *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Ej: Pigmentos orgánicos, mordientes y soporte textil"
-                  value={newWorkshopData.subtitle}
-                  onChange={(e) => setNewWorkshopData({ ...newWorkshopData, subtitle: e.target.value })}
-                  className="w-full px-3 py-1.5 bg-[#f0c510] border border-[#E52E33]"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div>
-                  <label className="block font-bold uppercase mb-1">Cupos Totales *</label>
-                  <input
-                    type="number"
-                    min={1}
-                    required
-                    value={newWorkshopData.totalSpots}
-                    onChange={(e) => setNewWorkshopData({ ...newWorkshopData, totalSpots: Number(e.target.value), availableSpots: Number(e.target.value) })}
-                    className="w-full px-3 py-1.5 bg-[#f0c510] border border-[#E52E33]"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold uppercase mb-1">Modalidad *</label>
-                  <select
-                    value={newWorkshopData.modality}
-                    onChange={(e) => setNewWorkshopData({ ...newWorkshopData, modality: e.target.value as any })}
-                    className="w-full px-3 py-1.5 bg-[#f0c510] border border-[#E52E33]"
-                  >
-                    <option value="presencial">Presencial</option>
-                    <option value="hibrido">Híbrido</option>
-                    <option value="virtual">Virtual</option>
-                    <option value="intensivo">Intensivo</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block font-bold uppercase mb-1">Arancel Regular ($) *</label>
-                  <input
-                    type="number"
-                    required
-                    value={newWorkshopData.regularPrice}
-                    onChange={(e) => setNewWorkshopData({ ...newWorkshopData, regularPrice: Number(e.target.value) })}
-                    className="w-full px-3 py-1.5 bg-[#f0c510] border border-[#E52E33]"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold uppercase mb-1">Arancel Socix ($) *</label>
-                  <input
-                    type="number"
-                    required
-                    value={newWorkshopData.memberPrice}
-                    onChange={(e) => setNewWorkshopData({ ...newWorkshopData, memberPrice: Number(e.target.value) })}
-                    className="w-full px-3 py-1.5 bg-[#f0c510] border border-[#E52E33]"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-bold uppercase mb-1">Docente *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Nombre del docente"
-                    value={newWorkshopData.teacherName}
-                    onChange={(e) => setNewWorkshopData({ ...newWorkshopData, teacherName: e.target.value })}
-                    className="w-full px-3 py-1.5 bg-[#f0c510] border border-[#E52E33]"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold uppercase mb-1">Horarios *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Jueves 19:00 a 21:30"
-                    value={newWorkshopData.schedule}
-                    onChange={(e) => setNewWorkshopData({ ...newWorkshopData, schedule: e.target.value })}
-                    className="w-full px-3 py-1.5 bg-[#f0c510] border border-[#E52E33]"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-bold uppercase mb-1">Descripción del Taller *</label>
-                <textarea
-                  rows={3}
-                  required
-                  value={newWorkshopData.description}
-                  onChange={(e) => setNewWorkshopData({ ...newWorkshopData, description: e.target.value })}
-                  className="w-full px-3 py-1.5 bg-[#f0c510] border border-[#E52E33]"
-                />
-              </div>
-
-              <div className="pt-2 border-t border-[#E52E33] flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setIsCreatingWorkshop(false)}
-                  className="px-4 py-2 border border-[#E52E33] uppercase"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="btn-brand-inverse px-5 py-2 uppercase font-bold"
-                >
-                  Publicar Taller
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <WorkshopEditorModal
+        isOpen={isCreatingWorkshop}
+        isEditing={false}
+        workshop={newWorkshopData}
+        onClose={() => setIsCreatingWorkshop(false)}
+        onSave={(created) => {
+          onAddWorkshop(created);
+          setIsCreatingWorkshop(false);
+        }}
+      />
 
       {/* ================= SUB-MODAL: EDITAR TALLER ================= */}
-      {editingWorkshop && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm">
-          <div className="bg-[#FFD41D] text-[#E52E33] border-3 border-[#E52E33] w-full max-w-2xl p-6 shadow-2xl space-y-4 max-h-[88vh] overflow-y-auto">
-            <div className="flex justify-between items-center border-b border-[#E52E33] pb-2">
-              <span className="font-mono text-xs uppercase font-bold tracking-wider">
-                Editar Taller: {editingWorkshop.title}
-              </span>
-              <button onClick={() => setEditingWorkshop(null)} className="p-1 border border-[#E52E33]">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                onUpdateWorkshop(editingWorkshop);
-                setEditingWorkshop(null);
-              }}
-              className="space-y-4 font-mono text-xs"
-            >
-              <div>
-                <label className="block font-bold uppercase mb-1">Título</label>
-                <input
-                  type="text"
-                  required
-                  value={editingWorkshop.title}
-                  onChange={(e) => setEditingWorkshop({ ...editingWorkshop, title: e.target.value })}
-                  className="w-full px-3 py-1.5 bg-[#f0c510] border border-[#E52E33] font-bold"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div>
-                  <label className="block font-bold uppercase mb-1">Vacantes Disponibles</label>
-                  <input
-                    type="number"
-                    min={0}
-                    value={editingWorkshop.availableSpots}
-                    onChange={(e) => setEditingWorkshop({ ...editingWorkshop, availableSpots: Number(e.target.value) })}
-                    className="w-full px-3 py-1.5 bg-[#f0c510] border border-[#E52E33] font-bold"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold uppercase mb-1">Cupos Totales</label>
-                  <input
-                    type="number"
-                    min={1}
-                    value={editingWorkshop.totalSpots}
-                    onChange={(e) => setEditingWorkshop({ ...editingWorkshop, totalSpots: Number(e.target.value) })}
-                    className="w-full px-3 py-1.5 bg-[#f0c510] border border-[#E52E33]"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold uppercase mb-1">Precio Regular ($)</label>
-                  <input
-                    type="number"
-                    value={editingWorkshop.regularPrice}
-                    onChange={(e) => setEditingWorkshop({ ...editingWorkshop, regularPrice: Number(e.target.value) })}
-                    className="w-full px-3 py-1.5 bg-[#f0c510] border border-[#E52E33]"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold uppercase mb-1">Precio Socix ($)</label>
-                  <input
-                    type="number"
-                    value={editingWorkshop.memberPrice}
-                    onChange={(e) => setEditingWorkshop({ ...editingWorkshop, memberPrice: Number(e.target.value) })}
-                    className="w-full px-3 py-1.5 bg-[#f0c510] border border-[#E52E33]"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-bold uppercase mb-1">Horarios</label>
-                  <input
-                    type="text"
-                    value={editingWorkshop.schedule}
-                    onChange={(e) => setEditingWorkshop({ ...editingWorkshop, schedule: e.target.value })}
-                    className="w-full px-3 py-1.5 bg-[#f0c510] border border-[#E52E33]"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold uppercase mb-1">Fechas</label>
-                  <input
-                    type="text"
-                    value={editingWorkshop.dates}
-                    onChange={(e) => setEditingWorkshop({ ...editingWorkshop, dates: e.target.value })}
-                    className="w-full px-3 py-1.5 bg-[#f0c510] border border-[#E52E33]"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-bold uppercase mb-1">Descripción</label>
-                <textarea
-                  rows={3}
-                  value={editingWorkshop.description}
-                  onChange={(e) => setEditingWorkshop({ ...editingWorkshop, description: e.target.value })}
-                  className="w-full px-3 py-1.5 bg-[#f0c510] border border-[#E52E33]"
-                />
-              </div>
-
-              <div className="pt-2 border-t border-[#E52E33] flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setEditingWorkshop(null)}
-                  className="px-4 py-2 border border-[#E52E33] uppercase"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="btn-brand-inverse px-5 py-2 uppercase font-bold"
-                >
-                  Guardar Cambios
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <WorkshopEditorModal
+        isOpen={!!editingWorkshop}
+        isEditing={true}
+        workshop={editingWorkshop}
+        onClose={() => setEditingWorkshop(null)}
+        onSave={(updated) => {
+          onUpdateWorkshop(updated);
+          setEditingWorkshop(null);
+        }}
+      />
 
       {/* ================= SUB-MODAL: NUEVA / EDITAR NOTA BITACORA ================= */}
       {(isCreatingBitacoraEntry || editingBitacoraEntry) && (

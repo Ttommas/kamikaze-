@@ -290,8 +290,7 @@ export default function App() {
 
         {/* ================= HERO SECTION ================= */}
         <section 
-          className="ph lbl min-h-[75vh] sm:min-h-[80vh] border-b border-[#E52E33] flex flex-col justify-between p-6 sm:p-12 relative overflow-hidden"
-          data-l="[ imagen · proceso · kamikaze 2026 ]"
+          className="ph min-h-[75vh] sm:min-h-[80vh] border-b border-[#E52E33] flex flex-col justify-between p-6 sm:p-12 relative overflow-hidden"
         >
           {/* Top meta tags */}
           <div className="relative z-10 flex justify-between items-start">
@@ -394,7 +393,16 @@ export default function App() {
               </div>
               <div className="flex items-center gap-1.5">
                 <Phone className="w-3.5 h-3.5" />
-                <span>{walletConfig.whatsappNumber}</span>
+                <a 
+                  href={`https://wa.me/${walletConfig.whatsappNumber.replace(/[^0-9]/g, '')}`} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="underline hover:opacity-100 flex items-center gap-1"
+                  title="Escribir por WhatsApp a Kamikaze"
+                >
+                  <span>{walletConfig.whatsappNumber}</span>
+                  <span className="text-[10px] bg-[#E52E33] text-[#FFD41D] px-1 py-0.2 font-bold uppercase">WhatsApp</span>
+                </a>
               </div>
             </div>
           </div>
@@ -444,6 +452,7 @@ export default function App() {
         onEnrollmentComplete={handleEnrollmentComplete}
         currentUser={currentUser}
         onOpenStudentLogin={() => setIsStudentPortalOpen(true)}
+        onStudentLogin={(user) => setCurrentUser(user)}
       />
 
       {/* 3. Student / Participant Portal */}
@@ -487,17 +496,10 @@ export default function App() {
       <ProposeWorkshopModal
         isOpen={isProposalModalOpen}
         onClose={() => setIsProposalModalOpen(false)}
+        walletConfig={walletConfig}
       />
 
-      {/* Floating Quick Admin Access Button */}
-      <button
-        onClick={() => setIsAdminPanelOpen(true)}
-        className="fixed bottom-4 right-4 z-40 bg-[#E52E33] text-[#FFD41D] border-2 border-black/30 hover:bg-[#c92429] px-3.5 py-2.5 shadow-2xl font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-2 cursor-pointer transition-transform hover:scale-105 active:scale-95"
-        title="Abrir Panel de Administración KAMIKAZE"
-      >
-        <Lock className="w-4 h-4" />
-        <span>Panel Admin</span>
-      </button>
+
     </div>
   );
 }

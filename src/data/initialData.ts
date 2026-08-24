@@ -16,9 +16,9 @@ export const INITIAL_WALLET_CONFIG: WalletConfig = {
   mpTitular: 'Colectivo Kamikaze Hacer Juntos',
   mpAccountName: 'KAMIKAZE / PROCESO Y MATERIA',
   mpPaymentLink: 'https://link.mercadopago.com.ar/kamikazetalleres',
-  whatsappNumber: '+54 9 11 4829-0192',
-  contactEmail: 'talleres@kamikaze.xyz',
-  atelierAddress: 'Pasaje El Accidente 1420, CABA',
+  whatsappNumber: '+54 9 2213036525',
+  contactEmail: 'Colectivokmkz@gmail.com',
+  atelierAddress: 'Brandsen 2032, Barracas',
 };
 
 export const INITIAL_WORKSHOPS: Workshop[] = [
@@ -55,7 +55,7 @@ export const INITIAL_WORKSHOPS: Workshop[] = [
       'Tableros y caballetes de pie'
     ],
     requirements: 'No se requieren conocimientos previos. Traer ropa cómoda que pueda mancharse.',
-    location: 'Taller Central Kamikaze (Pasaje El Accidente 1420)',
+    location: 'Taller Central Kamikaze (Brandsen 2032, Barracas)',
     featured: true,
     active: true,
   },

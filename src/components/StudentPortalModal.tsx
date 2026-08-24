@@ -3,9 +3,10 @@ import {
   X, User, Mail, Phone, ShieldCheck, QrCode, 
   Calendar, CheckCircle, Clock, AlertCircle, 
   ArrowRight, Sparkles, LogOut, Check, ExternalLink, 
-  Download, BookOpen, CreditCard 
+  Download, BookOpen, CreditCard, Shield 
 } from 'lucide-react';
 import { StudentUser, Enrollment, Workshop, WalletConfig } from '../types';
+import { GoogleSignInModal } from './GoogleSignInModal';
 
 interface StudentPortalModalProps {
   isOpen: boolean;
@@ -48,8 +49,8 @@ export const StudentPortalModal: React.FC<StudentPortalModalProps> = ({
 
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [loginEmail, setLoginEmail] = useState('');
-  const [loginPass, setLoginPass] = useState('');
   const [activeTab, setActiveTab] = useState<'mis_cursos' | 'perfil' | 'catalogo'>('mis_cursos');
+  const [isGoogleSignInModalOpen, setIsGoogleSignInModalOpen] = useState(false);
 
   // Register Form State
   const [regName, setRegName] = useState('');
@@ -68,29 +69,34 @@ export const StudentPortalModal: React.FC<StudentPortalModalProps> = ({
   // Selected Pass for QR view
   const [selectedPass, setSelectedPass] = useState<Enrollment | null>(null);
 
-  // Google Login Simulation
-  const handleGoogleLogin = (customEmail?: string) => {
-    const emailToUse = customEmail || loginEmail || 'participante.arte@gmail.com';
-    const namePart = emailToUse.split('@')[0].replace('.', ' ');
-    const formattedName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+  // Google / Gmail Sync Notification
+  const [gmailSyncNotification, setGmailSyncNotification] = useState<string | null>(null);
 
-    const googleUser: StudentUser = {
-      id: 'usr-' + Date.now(),
-      name: formattedName || 'Participante Kamikaze',
-      email: emailToUse,
-      phone: '+54 9 11 4982-3344',
-      doc: '38.920.114',
-      isMember: true,
-      avatarUrl: `https://api.dicebear.com/7.x/bottts/svg?seed=${emailToUse}`,
-      provider: 'google',
-      createdAt: new Date().toISOString(),
-    };
+  // Open Google Auth Modal
+  const handleOpenGoogleAuth = (prefillEmail?: string) => {
+    if (prefillEmail) {
+      setLoginEmail(prefillEmail);
+    }
+    setIsGoogleSignInModalOpen(true);
+  };
 
-    onLogin(googleUser);
-    setProfileName(googleUser.name);
-    setProfilePhone(googleUser.phone);
-    setProfileDoc(googleUser.doc || '');
-    setProfileIsMember(googleUser.isMember);
+  // Add to Google Calendar direct link generator
+  const handleAddToGoogleCalendar = (enrollment: Enrollment) => {
+    const ws = workshops.find((w) => w.id === enrollment.workshopId);
+    const title = encodeURIComponent(`${enrollment.workshopTitle} · Taller KAMIKAZE`);
+    const details = encodeURIComponent(
+      `Inscripción oficial en Colectivo Kamikaze (Pase #${enrollment.enrollmentCode})\n\n` +
+      `Taller: ${enrollment.workshopTitle}\n` +
+      `Docente: ${ws?.teacherName || 'Equipo Docente'}\n` +
+      `Fechas: ${ws?.dates || 'Consultar'}\n` +
+      `Horario: ${ws?.schedule || 'Consultar'}\n` +
+      `Sede: ${ws?.location || 'Brandsen 2032, Barracas'}\n` +
+      `Pase de acceso: ${enrollment.enrollmentCode}\n` +
+      `Estado: ${enrollment.paymentStatus === 'confirmado' ? 'Confirmado' : 'Registrado'}`
+    );
+    const location = encodeURIComponent(ws?.location || 'Brandsen 2032, Barracas, CABA');
+    const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}&location=${location}`;
+    window.open(gcalUrl, '_blank', 'noopener,noreferrer');
   };
 
   const handleEmailAuth = (e: React.FormEvent) => {
@@ -152,8 +158,8 @@ PRODID:-//KAMIKAZE Talleres 2026//ES
 CALSCALE:GREGORIAN
 BEGIN:VEVENT
 SUMMARY:${enrollment.workshopTitle} - KAMIKAZE
-DESCRIPTION:Inscripción confirmada (${enrollment.enrollmentCode}). Sede: ${ws?.location || 'Pasaje El Accidente 1420'}.
-LOCATION:${ws?.location || 'Pasaje El Accidente 1420, CABA'}
+DESCRIPTION:Inscripción confirmada (${enrollment.enrollmentCode}). Sede: ${ws?.location || 'Brandsen 2032, Barracas'}.
+LOCATION:${ws?.location || 'Brandsen 2032, Barracas, CABA'}
 STATUS:CONFIRMED
 END:VEVENT
 END:VCALENDAR`;
@@ -210,20 +216,53 @@ END:VCALENDAR`;
           {!currentUser ? (
             <div className="max-w-md mx-auto space-y-6 py-4">
               <div className="text-center space-y-2">
-                <h3 className="brand-title text-3xl font-bold">Ingresar al Portal</h3>
+                <div className="inline-flex items-center justify-center p-3 bg-white border-2 border-[#E52E33] shadow-md mb-2">
+                  {/* Google Multi-color G */}
+                  <svg className="w-8 h-8" viewBox="0 0 24 24">
+                    <path
+                      fill="#4285F4"
+                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                    />
+                    <path
+                      fill="#EA4335"
+                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                    />
+                  </svg>
+                </div>
+                <h3 className="brand-title text-3xl font-bold">Portal Alumnxs & Participantes</h3>
                 <p className="text-xs opacity-90 font-mono">
-                  Guardá tus datos para inscribirte a talleres en 1-click y descargar tus pases digitales con QR.
+                  Ingreso oficial con tu cuenta de Google / Gmail para validar tus inscripciones y pases digitales.
                 </p>
               </div>
 
-              {/* 1-Click Google Login Button */}
-              <div className="space-y-3">
+              {/* Main Gmail Login Action Box */}
+              <div className="bg-white text-neutral-900 border-2 border-[#E52E33] p-5 shadow-lg space-y-4">
+                <div className="space-y-1.5">
+                  <span className="text-xs uppercase font-mono font-bold text-neutral-500 tracking-wider block">
+                    Acceso Instantáneo
+                  </span>
+                  <h4 className="text-base font-bold text-neutral-900 leading-snug">
+                    Ingresá con la app de Gmail para sincronizar tus formularios
+                  </h4>
+                  <p className="text-xs text-neutral-600 font-sans leading-relaxed">
+                    Al identificarte con tu cuenta de Gmail, tu nombre y correo se utilizarán automáticamente en el formulario de inscripción a talleres y se emitirá tu credencial digital.
+                  </p>
+                </div>
+
                 <button
-                  onClick={() => handleGoogleLogin()}
-                  className="w-full py-3 px-4 bg-white text-neutral-800 border-2 border-[#E52E33] font-mono text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-3 shadow-md hover:bg-neutral-50 transition-colors cursor-pointer"
+                  type="button"
+                  onClick={() => handleOpenGoogleAuth()}
+                  className="w-full py-3 px-4 bg-white hover:bg-neutral-50 text-neutral-900 border-2 border-neutral-300 hover:border-neutral-400 font-mono text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-3 shadow-sm hover:shadow transition-all cursor-pointer"
                 >
-                  {/* Google G SVG */}
-                  <svg className="w-4 h-4" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5" viewBox="0 0 24 24">
                     <path
                       fill="#4285F4"
                       d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -242,110 +281,60 @@ END:VCALENDAR`;
                     />
                   </svg>
                   <span>Continuar con Google / Gmail</span>
+                  <ArrowRight className="w-4 h-4 text-[#E52E33] ml-auto" />
                 </button>
 
-                <div className="flex items-center gap-3 my-4">
-                  <div className="h-px bg-[#E52E33]/30 flex-1" />
-                  <span className="text-[10px] font-mono uppercase tracking-widest opacity-70">
-                    O con tu email
-                  </span>
-                  <div className="h-px bg-[#E52E33]/30 flex-1" />
+                <div className="pt-2 border-t border-neutral-200">
+                  <div className="text-[11px] text-neutral-500 font-mono flex items-center justify-between mb-2">
+                    <span>Cuentas sugeridas en este dispositivo:</span>
+                  </div>
+                  
+                  {/* Quick Select Buttons */}
+                  <div className="space-y-1.5">
+                    <button
+                      type="button"
+                      onClick={() => handleOpenGoogleAuth('Colectivokmkz@gmail.com')}
+                      className="w-full p-2 bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 text-left flex items-center gap-2.5 transition-colors cursor-pointer"
+                    >
+                      <div className="w-7 h-7 rounded-full bg-[#E52E33] text-[#FFD41D] flex items-center justify-center text-xs font-bold font-mono">
+                        KM
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-xs font-bold text-neutral-900 truncate">Colectivo KAMIKAZE</div>
+                        <div className="text-[11px] text-neutral-500 font-mono truncate">Colectivokmkz@gmail.com</div>
+                      </div>
+                      <span className="text-[10px] font-mono text-blue-600 uppercase font-bold">Ingresar →</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleOpenGoogleAuth('lucia.benitez.arte@gmail.com')}
+                      className="w-full p-2 bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 text-left flex items-center gap-2.5 transition-colors cursor-pointer"
+                    >
+                      <div className="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-bold font-mono">
+                        LB
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-xs font-bold text-neutral-900 truncate">Lucía Benítez</div>
+                        <div className="text-[11px] text-neutral-500 font-mono truncate">lucia.benitez.arte@gmail.com</div>
+                      </div>
+                      <span className="text-[10px] font-mono text-blue-600 uppercase font-bold">Ingresar →</span>
+                    </button>
+                  </div>
                 </div>
               </div>
 
-              {/* Email Form */}
-              <form onSubmit={handleEmailAuth} className="space-y-3 font-mono text-xs">
-                {authMode === 'register' && (
-                  <>
-                    <div>
-                      <label className="block font-bold uppercase mb-1">Nombre & Apellido *</label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="Ej: Clara Salmerón"
-                        value={regName}
-                        onChange={(e) => setRegName(e.target.value)}
-                        className="w-full px-3 py-2 bg-yellow-400/10 border border-[#E52E33]"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block font-bold uppercase mb-1">Teléfono / WhatsApp *</label>
-                      <input
-                        type="tel"
-                        required
-                        placeholder="+54 9 11 4829-0192"
-                        value={regPhone}
-                        onChange={(e) => setRegPhone(e.target.value)}
-                        className="w-full px-3 py-2 bg-yellow-400/10 border border-[#E52E33]"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block font-bold uppercase mb-1">DNI / Documento</label>
-                      <input
-                        type="text"
-                        placeholder="DNI o Pasaporte"
-                        value={regDoc}
-                        onChange={(e) => setRegDoc(e.target.value)}
-                        className="w-full px-3 py-2 bg-yellow-400/10 border border-[#E52E33]"
-                      />
-                    </div>
-                  </>
-                )}
-
-                <div>
-                  <label className="block font-bold uppercase mb-1">Email *</label>
-                  <input
-                    type="email"
-                    required
-                    placeholder="tu@email.com"
-                    value={authMode === 'login' ? loginEmail : regEmail}
-                    onChange={(e) => authMode === 'login' ? setLoginEmail(e.target.value) : setRegEmail(e.target.value)}
-                    className="w-full px-3 py-2 bg-yellow-400/10 border border-[#E52E33]"
-                  />
+              {/* Benefits list */}
+              <div className="p-3.5 bg-[#f0c510] border border-[#E52E33] space-y-2 text-xs font-mono">
+                <div className="font-bold flex items-center gap-1.5">
+                  <Shield className="w-4 h-4" />
+                  <span>Beneficios de tu cuenta Google / Gmail:</span>
                 </div>
-
-                {authMode === 'login' && (
-                  <div>
-                    <label className="block font-bold uppercase mb-1">Contraseña</label>
-                    <input
-                      type="password"
-                      placeholder="••••••••"
-                      value={loginPass}
-                      onChange={(e) => setLoginPass(e.target.value)}
-                      className="w-full px-3 py-2 bg-yellow-400/10 border border-[#E52E33]"
-                    />
-                  </div>
-                )}
-
-                {authMode === 'register' && (
-                  <label className="flex items-center gap-2 pt-1 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={regIsMember}
-                      onChange={(e) => setRegIsMember(e.target.checked)}
-                      className="accent-[#E52E33]"
-                    />
-                    <span className="text-[11px]">Soy Socix mensual de KAMIKAZE (Arancel Bonificado)</span>
-                  </label>
-                )}
-
-                <button
-                  type="submit"
-                  className="btn-brand-inverse w-full py-3 uppercase tracking-wider font-bold mt-2 cursor-pointer"
-                >
-                  {authMode === 'login' ? 'Ingresar a mi Cuenta' : 'Crear mi Cuenta de Alumnx'}
-                </button>
-              </form>
-
-              <div className="text-center pt-2">
-                <button
-                  onClick={() => setAuthMode(authMode === 'login' ? 'register' : 'login')}
-                  className="text-xs font-mono underline uppercase opacity-85 hover:opacity-100"
-                >
-                  {authMode === 'login' ? '¿No tenés cuenta? Registrate acá' : '¿Ya tenés cuenta? Iniciá sesión'}
-                </button>
+                <ul className="space-y-1 opacity-90 pl-5 list-disc text-[11px]">
+                  <li>Carga de tus datos de contacto en 1 clic en inscripciones.</li>
+                  <li>Agendado de fechas y direcciones en Google Calendar.</li>
+                  <li>Emisión de pase digital con QR y arancel bonificado si sos socix.</li>
+                </ul>
               </div>
             </div>
           ) : (
@@ -366,12 +355,25 @@ END:VCALENDAR`;
                     </div>
                   )}
                   <div>
-                    <h3 className="brand-title text-xl font-bold leading-tight flex items-center gap-2">
+                    <h3 className="brand-title text-xl font-bold leading-tight flex flex-wrap items-center gap-2">
                       <span>{currentUser.name}</span>
                       {currentUser.isMember && (
                         <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 bg-[#E52E33] text-[#FFD41D] font-bold">
                           ★ Socix Activo
                         </span>
+                      )}
+                      {(currentUser.provider === 'google' || currentUser.email.includes('@gmail.com')) ? (
+                        <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 bg-green-800 text-white font-bold flex items-center gap-1">
+                          <Check className="w-3 h-3" />
+                          <span>Gmail Verificado</span>
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => handleOpenGoogleAuth()}
+                          className="text-[10px] font-mono uppercase px-1.5 py-0.5 bg-neutral-800 text-white font-bold hover:bg-[#E52E33] transition-colors cursor-pointer"
+                        >
+                          + Conectar Gmail
+                        </button>
                       )}
                     </h3>
                     <p className="text-xs font-mono opacity-80">{currentUser.email} · {currentUser.phone}</p>
@@ -379,6 +381,14 @@ END:VCALENDAR`;
                 </div>
 
                 <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleOpenGoogleAuth()}
+                    className="btn-brand px-3 py-1.5 font-mono text-xs uppercase tracking-wider flex items-center gap-1.5 font-bold cursor-pointer"
+                    title="Cambiar o vincular cuenta Google / Gmail"
+                  >
+                    <Mail className="w-3.5 h-3.5" />
+                    <span>Cambiar Cuenta Gmail</span>
+                  </button>
                   <button
                     onClick={onLogout}
                     className="btn-brand px-3 py-1.5 font-mono text-xs uppercase tracking-wider flex items-center gap-1.5 font-bold cursor-pointer"
@@ -388,6 +398,13 @@ END:VCALENDAR`;
                   </button>
                 </div>
               </div>
+
+              {gmailSyncNotification && (
+                <div className="p-3 bg-green-800 text-white font-mono text-xs font-bold flex items-center gap-2">
+                  <Check className="w-4 h-4" />
+                  <span>{gmailSyncNotification}</span>
+                </div>
+              )}
 
               {/* Navigation Sub-Tabs */}
               <div className="flex border-b border-[#E52E33] font-mono text-xs uppercase tracking-wider">
@@ -505,7 +522,7 @@ END:VCALENDAR`;
 
                             {/* Actions bar for this enrollment */}
                             <div className="pt-2 border-t border-[#E52E33]/30 flex flex-wrap items-center justify-between gap-3 font-mono text-xs">
-                              <div className="flex items-center gap-2">
+                              <div className="flex flex-wrap items-center gap-2">
                                 <button
                                   onClick={() => setSelectedPass(enr)}
                                   className="btn-brand px-3 py-1.5 uppercase font-bold flex items-center gap-1.5 shadow-xs"
@@ -515,11 +532,39 @@ END:VCALENDAR`;
                                 </button>
 
                                 <button
+                                  onClick={() => handleAddToGoogleCalendar(enr)}
+                                  className="btn-brand-inverse px-3 py-1.5 uppercase font-bold flex items-center gap-1.5 shadow-xs"
+                                  title="Añadir evento directamente a Google Calendar"
+                                >
+                                  {/* Google G icon */}
+                                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
+                                    <path
+                                      fill="#4285F4"
+                                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                                    />
+                                    <path
+                                      fill="#34A853"
+                                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                                    />
+                                    <path
+                                      fill="#FBBC05"
+                                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                                    />
+                                    <path
+                                      fill="#EA4335"
+                                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                                    />
+                                  </svg>
+                                  <span>+ Google Calendar</span>
+                                </button>
+
+                                <button
                                   onClick={() => handleDownloadIcs(enr)}
                                   className="px-3 py-1.5 border border-[#E52E33] hover:bg-[#E52E33] hover:text-[#FFD41D] uppercase font-bold flex items-center gap-1.5 transition-colors"
+                                  title="Descargar archivo de calendario .ics para Apple / Outlook"
                                 >
                                   <Calendar className="w-3.5 h-3.5" />
-                                  <span>Agregar a Calendario</span>
+                                  <span>Descargar .ics</span>
                                 </button>
                               </div>
 
@@ -543,78 +588,135 @@ END:VCALENDAR`;
 
               {/* TAB 2: MI PERFIL */}
               {activeTab === 'perfil' && (
-                <form onSubmit={handleSaveProfile} className="space-y-4 max-w-lg font-mono text-xs">
-                  {profileSaved && (
-                    <div className="p-3 bg-green-800 text-white font-bold flex items-center gap-2">
-                      <Check className="w-4 h-4" />
-                      <span>¡Tus datos fueron actualizados correctamente!</span>
+                <div className="space-y-6 max-w-xl">
+                  {/* Google / Gmail Sync status badge & card */}
+                  <div className="p-4 border-2 border-[#E52E33] bg-[#f0c510] space-y-3 font-mono text-xs shadow-xs">
+                    <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b border-[#E52E33]/30 pb-2.5">
+                      <div className="flex items-center gap-2">
+                        {/* Google G icon */}
+                        <svg className="w-5 h-5" viewBox="0 0 24 24">
+                          <path
+                            fill="#4285F4"
+                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                          />
+                          <path
+                            fill="#34A853"
+                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                          />
+                          <path
+                            fill="#FBBC05"
+                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                          />
+                          <path
+                            fill="#EA4335"
+                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                          />
+                        </svg>
+                        <div>
+                          <span className="font-bold uppercase tracking-wider block">
+                            Sincronización con Google / Gmail
+                          </span>
+                          <span className="text-[11px] opacity-80">
+                            {currentUser.email}
+                          </span>
+                        </div>
+                      </div>
+
+                      <span className="px-2 py-0.5 bg-green-800 text-white font-bold text-[10px] uppercase tracking-wider flex items-center gap-1 shrink-0">
+                        <Check className="w-3 h-3" />
+                        <span>Sincronizado</span>
+                      </span>
                     </div>
-                  )}
 
-                  <div>
-                    <label className="block font-bold uppercase mb-1">Nombre & Apellido *</label>
-                    <input
-                      type="text"
-                      required
-                      value={profileName}
-                      onChange={(e) => setProfileName(e.target.value)}
-                      className="w-full px-3 py-2 bg-yellow-400/10 border border-[#E52E33]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold uppercase mb-1">Email Registrado (No modificable)</label>
-                    <input
-                      type="email"
-                      disabled
-                      value={currentUser.email}
-                      className="w-full px-3 py-2 bg-neutral-200/60 border border-[#E52E33] opacity-75 cursor-not-allowed"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold uppercase mb-1">Teléfono / WhatsApp *</label>
-                    <input
-                      type="tel"
-                      required
-                      value={profilePhone}
-                      onChange={(e) => setProfilePhone(e.target.value)}
-                      className="w-full px-3 py-2 bg-yellow-400/10 border border-[#E52E33]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold uppercase mb-1">DNI / Documento</label>
-                    <input
-                      type="text"
-                      value={profileDoc}
-                      onChange={(e) => setProfileDoc(e.target.value)}
-                      className="w-full px-3 py-2 bg-yellow-400/10 border border-[#E52E33]"
-                    />
-                  </div>
-
-                  <div className="p-3 border border-[#E52E33] bg-[#f0c510] space-y-1">
-                    <label className="flex items-center gap-2 font-bold uppercase cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={profileIsMember}
-                        onChange={(e) => setProfileIsMember(e.target.checked)}
-                        className="accent-[#E52E33]"
-                      />
-                      <span>Membresía Socix Activa ($6.000/mes)</span>
-                    </label>
-                    <p className="text-[11px] opacity-80 pl-5">
-                      Al tener membresía de Socix, accedés automáticamente al arancel bonificado en todos los cursos y talleres.
+                    <p className="text-[11px] opacity-85 leading-relaxed">
+                      Tu cuenta está vinculada con Google. Tus pases digitales con QR, notificaciones de talleres y recordatorios de calendario se sincronizan automáticamente con este correo de Gmail.
                     </p>
+
+                    <div className="flex flex-wrap items-center gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => handleOpenGoogleAuth()}
+                        className="btn-brand px-3 py-1.5 uppercase font-bold text-[11px] flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <Mail className="w-3.5 h-3.5" />
+                        <span>Cambiar / Vincular otra cuenta Gmail</span>
+                      </button>
+                    </div>
                   </div>
 
-                  <button
-                    type="submit"
-                    className="btn-brand-inverse px-6 py-2.5 uppercase tracking-wider font-bold cursor-pointer"
-                  >
-                    Guardar Cambios
-                  </button>
-                </form>
+                  <form onSubmit={handleSaveProfile} className="space-y-4 font-mono text-xs">
+                    {profileSaved && (
+                      <div className="p-3 bg-green-800 text-white font-bold flex items-center gap-2">
+                        <Check className="w-4 h-4" />
+                        <span>¡Tus datos fueron actualizados correctamente!</span>
+                      </div>
+                    )}
+
+                    <div>
+                      <label className="block font-bold uppercase mb-1">Nombre & Apellido *</label>
+                      <input
+                        type="text"
+                        required
+                        value={profileName}
+                        onChange={(e) => setProfileName(e.target.value)}
+                        className="w-full px-3 py-2 bg-yellow-400/10 border border-[#E52E33]"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-bold uppercase mb-1">Email Registrado (Sincronizado con Google)</label>
+                      <input
+                        type="email"
+                        disabled
+                        value={currentUser.email}
+                        className="w-full px-3 py-2 bg-neutral-200/60 border border-[#E52E33] opacity-75 cursor-not-allowed font-bold"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-bold uppercase mb-1">Teléfono / WhatsApp *</label>
+                      <input
+                        type="tel"
+                        required
+                        value={profilePhone}
+                        onChange={(e) => setProfilePhone(e.target.value)}
+                        className="w-full px-3 py-2 bg-yellow-400/10 border border-[#E52E33]"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-bold uppercase mb-1">DNI / Documento</label>
+                      <input
+                        type="text"
+                        value={profileDoc}
+                        onChange={(e) => setProfileDoc(e.target.value)}
+                        className="w-full px-3 py-2 bg-yellow-400/10 border border-[#E52E33]"
+                      />
+                    </div>
+
+                    <div className="p-3 border border-[#E52E33] bg-[#f0c510] space-y-1">
+                      <label className="flex items-center gap-2 font-bold uppercase cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={profileIsMember}
+                          onChange={(e) => setProfileIsMember(e.target.checked)}
+                          className="accent-[#E52E33]"
+                        />
+                        <span>Membresía Socix Activa ($6.000/mes)</span>
+                      </label>
+                      <p className="text-[11px] opacity-80 pl-5">
+                        Al tener membresía de Socix, accedés automáticamente al arancel bonificado en todos los cursos y talleres.
+                      </p>
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="btn-brand-inverse px-6 py-2.5 uppercase tracking-wider font-bold cursor-pointer"
+                    >
+                      Guardar Cambios
+                    </button>
+                  </form>
+                </div>
               )}
 
               {/* TAB 3: CATÁLOGO DIRECTO */}
@@ -734,18 +836,43 @@ END:VCALENDAR`;
               <div className="opacity-80">Presentar este código al ingresar al taller en la sede</div>
             </div>
 
-            <div className="pt-2 flex justify-center gap-3">
+            <div className="pt-2 flex flex-wrap justify-center gap-2">
+              <button
+                onClick={() => handleAddToGoogleCalendar(selectedPass)}
+                className="btn-brand-inverse px-3.5 py-2 font-mono text-xs uppercase font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
+              >
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
+                  <path
+                    fill="#4285F4"
+                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                  />
+                  <path
+                    fill="#EA4335"
+                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                  />
+                </svg>
+                <span>+ Google Calendar</span>
+              </button>
+
               <button
                 onClick={() => handleDownloadIcs(selectedPass)}
-                className="btn-brand px-4 py-2 font-mono text-xs uppercase font-bold flex items-center gap-1.5"
+                className="btn-brand px-3.5 py-2 font-mono text-xs uppercase font-bold flex items-center gap-1.5 cursor-pointer"
               >
                 <Calendar className="w-3.5 h-3.5" />
-                <span>Guardar Fecha</span>
+                <span>Descargar .ics</span>
               </button>
 
               <button
                 onClick={() => setSelectedPass(null)}
-                className="btn-brand-inverse px-5 py-2 font-mono text-xs uppercase font-bold cursor-pointer"
+                className="btn-brand-inverse px-4 py-2 font-mono text-xs uppercase font-bold cursor-pointer"
               >
                 Cerrar
               </button>
@@ -753,6 +880,23 @@ END:VCALENDAR`;
           </div>
         </div>
       )}
+
+      {/* Google / Gmail Sign In & Switch Account Modal */}
+      <GoogleSignInModal
+        isOpen={isGoogleSignInModalOpen}
+        onClose={() => setIsGoogleSignInModalOpen(false)}
+        onSuccess={(user) => {
+          onLogin(user);
+          setProfileName(user.name);
+          setProfilePhone(user.phone);
+          setProfileDoc(user.doc || '');
+          setProfileIsMember(user.isMember);
+          setGmailSyncNotification(`Cuenta de Google / Gmail vinculada: ${user.email}`);
+          setTimeout(() => setGmailSyncNotification(null), 4500);
+        }}
+        defaultEmail={loginEmail || currentUser?.email || ''}
+        contextText="para acceder a tus pases digitales y autocompletar inscripciones"
+      />
     </div>
   );
 };

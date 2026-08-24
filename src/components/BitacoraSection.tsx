@@ -54,17 +54,9 @@ export const BitacoraSection: React.FC<BitacoraSectionProps> = ({
     <section id="bitacora" className="border-b border-[#E52E33] scroll-mt-16">
       {/* Section Top Header */}
       <div className="flex justify-between items-baseline px-6 sm:px-12 py-7 border-b border-[#E52E33]">
-        <div className="flex items-center gap-3">
-          <h2 className="text-xs font-normal tracking-[0.2em] uppercase brand-title">
-            Bitácora — Registro vivo
-          </h2>
-          <span className="text-[10px] font-mono px-1.5 py-0.5 border border-[#E52E33] bg-[#f0c510]">
-            Proceso Abierto
-          </span>
-        </div>
-        <span className="text-xs tracking-[0.16em] uppercase font-mono">
-          Actualización semanal & audiovisual
-        </span>
+        <h2 className="text-xs font-normal tracking-[0.2em] uppercase brand-title">
+          Bitácora — Registro vivo
+        </h2>
       </div>
 
       {/* Bitacora Grid: 1. Escritos | 2. Audiovisual */}
@@ -73,7 +65,7 @@ export const BitacoraSection: React.FC<BitacoraSectionProps> = ({
         {/* 1. Notas Semanales (Escrito) */}
         <div className="p-6 sm:p-12 space-y-8">
           <div className="text-xs font-mono uppercase tracking-[0.16em] opacity-80 pb-2 border-b border-[#E52E33]/30">
-            01. Notas semanales de taller (Escrito)
+            01. Notas semanales
           </div>
 
           <div className="space-y-8">
@@ -124,11 +116,11 @@ export const BitacoraSection: React.FC<BitacoraSectionProps> = ({
           </div>
         </div>
 
-        {/* 2. Resumen Audiovisual (YouTube Feed) */}
+        {/* 2. Bitácora Audiovisual (YouTube Feed) */}
         <div className="p-6 sm:p-12 flex flex-col justify-between bg-[#E52E33]/5 space-y-6">
           <div>
             <div className="flex items-center justify-between text-xs font-mono uppercase tracking-[0.16em] opacity-80 pb-2 border-b border-[#E52E33]/30">
-              <span>02. Resumen audiovisual (YouTube)</span>
+              <span>02. Bitácora audiovisual</span>
               <span className="text-[10px] px-1.5 py-0.5 bg-[#E52E33] text-[#FFD41D]">
                 {videoConfig.monthYear}
               </span>

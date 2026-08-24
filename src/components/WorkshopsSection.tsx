@@ -290,19 +290,6 @@ export const WorkshopsSection: React.FC<WorkshopsSectionProps> = ({
           })}
         </div>
       )}
-
-      {/* Bottom Info Banner about virtual wallet integration */}
-      <div className="px-6 sm:px-12 py-4 bg-[#f0c510] border-t border-[#E52E33] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono">
-        <div className="flex items-center gap-2">
-          <ShieldCheck className="w-4 h-4 text-[#E52E33]" />
-          <span>
-            <strong>Inscripciones automáticas:</strong> Al confirmar tu pago se genera tu Pase Digital y tu plaza queda asegurada al instante.
-          </span>
-        </div>
-        <div className="text-[11px] opacity-80">
-          Alias billetera: <strong>{walletConfig.mpAlias}</strong>
-        </div>
-      </div>
     </section>
   );
 };

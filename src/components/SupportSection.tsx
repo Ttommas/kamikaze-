@@ -26,13 +26,25 @@ export const SupportSection: React.FC<SupportSectionProps> = ({
 
   const handleConfirmSupport = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Prepare email mailto link
+    const subject = encodeURIComponent(
+      activeModal === 'socix' 
+        ? `[KAMIKAZE - Adhesión Socix] ${donorName}` 
+        : `[KAMIKAZE - Aporte Solidario $${customAmount}] ${donorName}`
+    );
+    const body = encodeURIComponent(
+      `Hola Colectivo Kamikaze,\n\n` +
+      `Registro mi adhesión/aporte:\n` +
+      `- Tipo: ${activeModal === 'socix' ? 'Socix Mensual ($6.000/mes)' : `Aporte Libre ($${customAmount})`}\n` +
+      `- Nombre: ${donorName}\n` +
+      `- Email: ${donorEmail}\n\n` +
+      `¡Saludos!`
+    );
+    const mailtoUrl = `mailto:${walletConfig.contactEmail}?subject=${subject}&body=${body}`;
+    window.open(mailtoUrl, '_blank');
+
     setSupportConfirmed(true);
-    setTimeout(() => {
-      setSupportConfirmed(false);
-      setActiveModal(null);
-      setDonorName('');
-      setDonorEmail('');
-    }, 3000);
   };
 
   return (
@@ -128,14 +140,38 @@ export const SupportSection: React.FC<SupportSectionProps> = ({
             </div>
 
             {supportConfirmed ? (
-              <div className="p-6 text-center space-y-3">
+              <div className="p-6 text-center space-y-4 font-mono">
                 <div className="w-12 h-12 rounded-full bg-[#E52E33] text-[#FFD41D] flex items-center justify-center mx-auto">
                   <Check className="w-6 h-6" />
                 </div>
                 <h3 className="brand-title text-2xl font-bold">¡Gracias por sostener el proceso!</h3>
-                <p className="text-xs opacity-90 font-mono">
-                  Registramos tu adhesión. Te enviamos los detalles a tu email.
+                <p className="text-xs opacity-90">
+                  Se generó el envío a <strong>{walletConfig.contactEmail}</strong>.
                 </p>
+                <div className="pt-2 flex flex-col sm:flex-row gap-2 justify-center">
+                  <a
+                    href={`https://wa.me/${walletConfig.contactPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
+                      `Hola Kamikaze! Me sumé como ${activeModal === 'socix' ? 'Socix Mensual' : `Aporte Solidario de $${customAmount}`} (${donorName}, ${donorEmail}).`
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-2 border border-[#E52E33] bg-[#E52E33] text-[#FFD41D] text-xs uppercase font-bold text-center"
+                  >
+                    Avisar por WhatsApp
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSupportConfirmed(false);
+                      setActiveModal(null);
+                      setDonorName('');
+                      setDonorEmail('');
+                    }}
+                    className="px-4 py-2 border border-[#E52E33] text-xs uppercase text-center"
+                  >
+                    Cerrar
+                  </button>
+                </div>
               </div>
             ) : (
               <form onSubmit={handleConfirmSupport} className="space-y-4 text-xs font-mono">
