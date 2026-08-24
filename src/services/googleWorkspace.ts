@@ -7,8 +7,18 @@ import {
   signOut,
   User as FirebaseUser,
 } from 'firebase/auth';
-import firebaseConfig from '../../firebase-applet-config.json';
+import firebaseConfigFile from '../../firebase-applet-config.json';
 import { StudentUser } from '../types';
+
+// Resolve Firebase Config from Vite env variables or JSON config
+const firebaseConfig = {
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || firebaseConfigFile.apiKey || 'AIzaSyCBXVayIwRqc5VqTMk1Wr2gTyGEoEn_u0U',
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || firebaseConfigFile.authDomain || 'kamikaze-506118.firebaseapp.com',
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || firebaseConfigFile.projectId || 'kamikaze-506118',
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || firebaseConfigFile.storageBucket || 'kamikaze-506118.firebasestorage.app',
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || firebaseConfigFile.messagingSenderId || '213341248529',
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || firebaseConfigFile.appId || '1:213341248529:web:8c0ec2553d59ec1e8c65b0',
+};
 
 // Initialize Firebase App
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
